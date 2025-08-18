@@ -867,7 +867,7 @@ def save_camera_parameters(
 
 if __name__ == "__main__":
     """
-    This interactive section generates a depth map by raycasting through each pixel. 
+    This interactive section generates a depth map by raycasting through each pixel.
     It is very useful for debugging camera.py.
     """
 

@@ -34,6 +34,8 @@ from infinigen.core.constraints.example_solver import (
     populate,
     state_def,
 )
+from mathutils.bvhtree import BVHTree
+
 from infinigen.core.constraints.example_solver.room import decorate as room_dec
 from infinigen.core.constraints.example_solver.solve import Solver
 from infinigen.core.placement import camera_trajectories as cam_traj
@@ -411,6 +413,57 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
 
     # state.print()
     state.to_json(output_folder / "solve_state.json")
+
+    def final_visibility_check():
+        objects_to_check = [
+            obj for obj in bpy.context.scene.objects
+            if obj.type == 'MESH' and obj.visible_get()
+        ]
+        if not objects_to_check:
+            logger.info("No mesh objects found for visibility check.")
+            return
+
+        logger.info(f"Building BVH-Tree for {len(objects_to_check)} objects.")
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        bvh = BVHTree.FromObjects(objects_to_check, depsgraph)
+        cameras = [cam for rig in camera_rigs for cam in rig.children if cam.type == 'CAMERA']
+        visibility_results = {}
+
+        for cam in cameras:
+            logger.info(f"Checking visibility for camera: {cam.name}")
+            visible_objects = set()
+            sensor_coords, pixel_iterator = cam_util.get_sensor_coords(
+                cam,
+                H=bpy.context.scene.render.resolution_y,
+                W=bpy.context.scene.render.resolution_x,
+                sparse=True
+            )
+
+            cam_location = cam.matrix_world.translation
+            for x, y in pixel_iterator:
+                destination = sensor_coords[y, x]
+                direction = (destination - cam_location).normalized()
+                hit_object, _, _, _ = bvh.ray_cast(cam_location, direction)
+
+                if hit_object is not None:
+                    visible_objects.add(hit_object)
+
+            visibility_results[cam.name] = list(visible_objects)
+            for cam_name, visible_objs in visibility_results.items():
+                logger.info(f"--- Camera '{cam_name}' can see {len(visible_objs)} objects: ---")
+                for obj in visible_objs:
+                    logger.info(f"  - {obj.name}")
+
+            import json
+            serializable_results = {
+                cam: [obj.name for obj in objs]
+                for cam, objs in visibility_results.items()
+            }
+            with open(output_folder / "visibility_report.json", "w") as f:
+                json.dump(serializable_results, f, indent=4)
+
+
+    p.run_stage("final_visibility_check", final_visibility_check, use_chance=False)
 
     def turn_off_lights():
         for o in bpy.data.objects:
