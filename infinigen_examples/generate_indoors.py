@@ -231,56 +231,110 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
     )
     house_bbox = (np.min(house_bbox, axis=0), np.max(house_bbox, axis=0))
 
-    camera_rigs = placement.camera.spawn_camera_rigs()
-
     nonroom_objs = [
         o.obj for o in state.objs.values() if t.Semantics.Room not in o.tags
     ]
     room_objs = [o.obj for o in state.objs.values() if t.Semantics.Room in o.tags]
     scene_objs = solved_rooms + nonroom_objs
 
-    def pose_cameras():
-        scene_preprocessed = placement.camera.camera_selection_preprocessing(
-            terrain=None, scene_objs=scene_objs
-        )
-
-        solved_floor_surface = butil.join_objects(
-            [
-                tagging.extract_tagged_faces(o, {t.Subpart.SupportSurface})
-                for o in solved_rooms
-            ]
-        )
-
-        poses = cam_traj.compute_poses(
-            cam_rigs=camera_rigs,
-            scene_preprocessed=scene_preprocessed,
-            init_surfaces=solved_floor_surface,
-            nonroom_objs=nonroom_objs,
-        )
-
-        butil.delete(solved_floor_surface)
-
-        return poses, scene_preprocessed
-
-    poses, scene_preprocessed = p.run_stage(
-        "pose_cameras", pose_cameras, use_chance=False, default=(None, None)
+    scene_preprocessed = placement.camera.camera_selection_preprocessing(
+        terrain=None, scene_objs=scene_objs
     )
 
-    def animate_cameras():
-        cam_traj.animate_trajectories(
-            cam_rigs=camera_rigs,
-            base_views=poses,
-            scene_preprocessed=scene_preprocessed,
-            obj_groups=[room_objs, nonroom_objs],
+    if overrides.get("place_2", False):
+        logger.info("Using --place_2 flag: Starting dual camera placement by reusing pose_cameras.")
+
+        # === TUNABLE PARAMETERS ===
+        MIN_INTERSECTION_FRAC = 0.05
+        MAX_INTERSECTION_FRAC = 0.5
+        SAMPLING_RESOLUTION = 0.3
+        MAX_SEARCH_TRIES = 50
+
+        room_bbox = solved_bbox
+        def reusable_pose_cameras(rigs_to_pose):
+            solved_floor_surface = butil.join_objects(
+                [
+                    tagging.extract_tagged_faces(o, {t.Subpart.SupportSurface})
+                    for o in solved_rooms
+                ]
+            )
+
+            poses = cam_traj.compute_poses(
+                cam_rigs=rigs_to_pose,
+                scene_preprocessed=scene_preprocessed,
+                init_surfaces=solved_floor_surface,
+                nonroom_objs=nonroom_objs,
+            )
+            butil.delete(solved_floor_surface)
+            return poses
+
+        logger.info("Placing Camera 1...")
+        all_camera_rigs = placement.camera.spawn_camera_rigs(n_camera_rigs=2)
+        cam_rig_1 = [all_camera_rigs[0]]
+        cam_rig_2 = [all_camera_rigs[1]]
+
+        cam1 = cam_rig_1[0].children[0]
+        cam2 = cam_rig_2[0].children[0]
+
+        logger.info("Placing Camera 1...")
+        reusable_pose_cameras(cam_rig_1)
+        logger.info(f"Placed Camera 1 at {cam1.location.to_tuple(2)}")
+
+        for i in range(MAX_SEARCH_TRIES):
+            logger.info(f"Attempt {i+1}/{MAX_SEARCH_TRIES} to place Camera 2...")
+            reusable_pose_cameras(cam_rig_2)
+
+            _, intersection_frac = placement.camera.calculate_view_fractions(
+                room_bbox, cam1, cam2, resolution=SAMPLING_RESOLUTION
+            )
+            logger.info(f"Candidate pose has intersection fraction: {intersection_frac:.2%}")
+
+            if MIN_INTERSECTION_FRAC <= intersection_frac <= MAX_INTERSECTION_FRAC:
+                logger.info(f"SUCCESS! Found valid pose for Camera 2 with desired intersection.")
+                break
+        else:
+            butil.delete(cam_rig_2)
+            raise RuntimeError(f"Failed to find a suitable pose for Camera 2 after {MAX_SEARCH_TRIES} tries.")
+        camera_rigs = cam_rig_1 + cam_rig_2
+
+    else:
+        logger.info("Default behavior: Posing and animating multiple cameras.")
+        camera_rigs = placement.camera.spawn_camera_rigs()
+
+        def pose_cameras():
+            solved_floor_surface = butil.join_objects(
+                [
+                    tagging.extract_tagged_faces(o, {t.Subpart.SupportSurface})
+                    for o in solved_rooms
+                ]
+            )
+            poses = cam_traj.compute_poses(
+                cam_rigs=camera_rigs,
+                scene_preprocessed=scene_preprocessed,
+                init_surfaces=solved_floor_surface,
+                nonroom_objs=nonroom_objs,
+            )
+            butil.delete(solved_floor_surface)
+            return poses, scene_preprocessed
+
+        poses, _ = p.run_stage(
+            "pose_cameras", pose_cameras, use_chance=False, default=(None, None)
         )
 
-        frames_folder = output_folder.parent / "frames"
-        animated_cams = [cam for cam in camera_rigs if cam.animation_data is not None]
-        save_imu_tum_files(frames_folder / "imu_tum", animated_cams)
+        def animate_cameras():
+            cam_traj.animate_trajectories(
+                cam_rigs=camera_rigs,
+                base_views=poses,
+                scene_preprocessed=scene_preprocessed,
+                obj_groups=[room_objs, nonroom_objs],
+            )
+            frames_folder = output_folder.parent / "frames"
+            animated_cams = [cam for cam in camera_rigs if cam.animation_data is not None]
+            save_imu_tum_files(frames_folder / "imu_tum", animated_cams)
 
-    p.run_stage(
-        "animate_cameras", animate_cameras, use_chance=False, prereq="pose_cameras"
-    )
+        p.run_stage(
+            "animate_cameras", animate_cameras, use_chance=False, prereq="pose_cameras"
+        )
 
     p.run_stage(
         "populate_intermediate_pholders",
@@ -413,57 +467,6 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
 
     # state.print()
     state.to_json(output_folder / "solve_state.json")
-
-    def final_visibility_check():
-        objects_to_check = [
-            obj for obj in bpy.context.scene.objects
-            if obj.type == 'MESH' and obj.visible_get()
-        ]
-        if not objects_to_check:
-            logger.info("No mesh objects found for visibility check.")
-            return
-
-        logger.info(f"Building BVH-Tree for {len(objects_to_check)} objects.")
-        depsgraph = bpy.context.evaluated_depsgraph_get()
-        bvh = BVHTree.FromObjects(objects_to_check, depsgraph)
-        cameras = [cam for rig in camera_rigs for cam in rig.children if cam.type == 'CAMERA']
-        visibility_results = {}
-
-        for cam in cameras:
-            logger.info(f"Checking visibility for camera: {cam.name}")
-            visible_objects = set()
-            sensor_coords, pixel_iterator = cam_util.get_sensor_coords(
-                cam,
-                H=bpy.context.scene.render.resolution_y,
-                W=bpy.context.scene.render.resolution_x,
-                sparse=True
-            )
-
-            cam_location = cam.matrix_world.translation
-            for x, y in pixel_iterator:
-                destination = sensor_coords[y, x]
-                direction = (destination - cam_location).normalized()
-                hit_object, _, _, _ = bvh.ray_cast(cam_location, direction)
-
-                if hit_object is not None:
-                    visible_objects.add(hit_object)
-
-            visibility_results[cam.name] = list(visible_objects)
-            for cam_name, visible_objs in visibility_results.items():
-                logger.info(f"--- Camera '{cam_name}' can see {len(visible_objs)} objects: ---")
-                for obj in visible_objs:
-                    logger.info(f"  - {obj.name}")
-
-            import json
-            serializable_results = {
-                cam: [obj.name for obj in objs]
-                for cam, objs in visibility_results.items()
-            }
-            with open(output_folder / "visibility_report.json", "w") as f:
-                json.dump(serializable_results, f, indent=4)
-
-
-    p.run_stage("final_visibility_check", final_visibility_check, use_chance=False)
 
     def turn_off_lights():
         for o in bpy.data.objects:
@@ -617,6 +620,12 @@ if __name__ == "__main__":
         help="Set of config files for gin (separated by spaces) "
         "e.g. --gin_config file1 file2 (exclude .gin from path)",
     )
+    parser.add_argument(
+        "--place_2",
+        action="store_true",
+        help="Use dual camera placement with volumetric intersection."
+    )
+
     parser.add_argument(
         "-p",
         "--overrides",

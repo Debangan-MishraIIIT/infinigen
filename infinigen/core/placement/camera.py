@@ -41,6 +41,74 @@ from . import animation_policy
 
 logger = logging.getLogger(__name__)
 
+# In Camera.py
+import bpy
+import numpy as np
+from mathutils import Vector
+from bpy_extras.object_utils import world_to_camera_view
+import logging
+
+logger = logging.getLogger(__name__)
+
+def calculate_view_fractions(room_bbox, cam1, cam2, resolution=0.1):
+    """
+    Calculates the fraction of a room's volume visible by cameras via point sampling.
+
+    Args:
+        room_bbox (tuple): A tuple of two Vectors (min_corner, max_corner).
+        cam1 (bpy.types.Object): The first camera object.
+        cam2 (bpy.types.Object): The second camera object.
+        resolution (float): The distance between sample points. A smaller number is
+                            more accurate but much slower.
+
+    Returns:
+        tuple: A tuple containing (union_fraction, intersection_fraction).
+    """
+    room_min, room_max = room_bbox
+    scene = bpy.context.scene
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+
+    # Use evaluated versions of cameras for accuracy with constraints/drivers
+    cam1_eval = cam1.evaluated_get(depsgraph)
+    cam2_eval = cam2.evaluated_get(depsgraph)
+
+    def is_in_view(point_world, cam):
+        coords_cam = world_to_camera_view(scene, cam, point_world)
+        return (0.0 < coords_cam.x < 1.0 and
+                0.0 < coords_cam.y < 1.0 and
+                coords_cam.z > 0)
+    print(room_min)
+    print(room_max)
+    x_r = np.arange(room_min[0], room_max[0], resolution)
+    y_r = np.arange(room_min[1], room_max[1], resolution)
+    z_r = np.arange(room_min[2], room_max[2], resolution)
+
+    total_points = len(x_r) * len(y_r) * len(z_r)
+    if total_points == 0:
+        logger.warning(f"Resolution {resolution} is too high for the room size, no points generated.")
+        return 0.0, 0.0
+
+    logger.info(f"Testing {total_points} sample points in the room volume...")
+
+    union_count = 0
+    intersection_count = 0
+
+    for x in x_r:
+        for y in y_r:
+            for z in z_r:
+                point = Vector((x, y, z))
+                cam1_sees = is_in_view(point, cam1_eval)
+                cam2_sees = is_in_view(point, cam2_eval)
+
+                if cam1_sees or cam2_sees:
+                    union_count += 1
+                if cam1_sees and cam2_sees:
+                    intersection_count += 1
+
+    union_fraction = union_count / total_points
+    intersection_fraction = intersection_count / total_points
+
+    return union_fraction, intersection_fraction
 
 @gin.configurable
 def get_sensor_coords(cam, H, W, sparse=False):
