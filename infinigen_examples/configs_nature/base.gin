@@ -24,7 +24,7 @@ render.render_image_func = @full/render_image
 configure_render_cycles.time_limit = 0
 
 configure_render_cycles.min_samples = 0
-configure_render_cycles.num_samples = 8192
+configure_render_cycles.num_samples = 2096 #8192
 configure_render_cycles.adaptive_threshold = 0.01
 configure_render_cycles.denoise = False
 configure_render_cycles.exposure = 1

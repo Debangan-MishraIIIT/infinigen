@@ -248,6 +248,12 @@ def execute_tasks(
             pickle.dump(info, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     camera_rigs = cam_util.get_camera_rigs()
+
+    #############
+    # print(f"camera_rigs: {camera_rigs}")
+    # camera_id = [0, 0]
+    #############
+
     camrig_id, subcam_id = camera_id
     active_camera = camera_rigs[camrig_id].children[subcam_id]
     cam_util.set_active_camera(active_camera)

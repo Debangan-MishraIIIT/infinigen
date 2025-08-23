@@ -284,14 +284,21 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
             logger.info(f"Attempt {i+1}/{MAX_SEARCH_TRIES} to place Camera 2...")
             reusable_pose_cameras(cam_rig_2)
 
-            _, intersection_frac = placement.camera.calculate_view_fractions(
+            union_frac, intersection_frac = placement.camera.calculate_view_fractions(
                 room_bbox, cam1, cam2, resolution=SAMPLING_RESOLUTION
             )
+            logger.info(f"Candidate pose has union fraction: {union_frac:.2%}")
             logger.info(f"Candidate pose has intersection fraction: {intersection_frac:.2%}")
 
-            if MIN_INTERSECTION_FRAC <= intersection_frac <= MAX_INTERSECTION_FRAC:
+            #########################################################
+            if union_frac >= 0.7 and intersection_frac <= 0.3:
                 logger.info(f"SUCCESS! Found valid pose for Camera 2 with desired intersection.")
                 break
+            #########################################################
+            # if MIN_INTERSECTION_FRAC <= intersection_frac <= MAX_INTERSECTION_FRAC:
+            #     logger.info(f"SUCCESS! Found valid pose for Camera 2 with desired intersection.")
+            #     break
+            #########################################################
         else:
             butil.delete(cam_rig_2)
             raise RuntimeError(f"Failed to find a suitable pose for Camera 2 after {MAX_SEARCH_TRIES} tries.")
