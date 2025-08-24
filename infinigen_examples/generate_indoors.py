@@ -248,7 +248,7 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
         MIN_INTERSECTION_FRAC = 0.05
         MAX_INTERSECTION_FRAC = 0.5
         SAMPLING_RESOLUTION = 0.3
-        MAX_SEARCH_TRIES = 50
+        MAX_SEARCH_TRIES = 20
 
         room_bbox = solved_bbox
         def reusable_pose_cameras(rigs_to_pose):
