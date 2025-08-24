@@ -291,7 +291,7 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
             logger.info(f"Candidate pose has intersection fraction: {intersection_frac:.2%}")
 
             #########################################################
-            if union_frac >= 0.7 and intersection_frac <= 0.3:
+            if union_frac >= 0.6 and intersection_frac <= 0.3 and intersection_frac >= 0.05:
                 logger.info(f"SUCCESS! Found valid pose for Camera 2 with desired intersection.")
                 break
             #########################################################
