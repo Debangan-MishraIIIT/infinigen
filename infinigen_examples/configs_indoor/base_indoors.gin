@@ -39,8 +39,8 @@ group_collections.config = [
 ]
 
 configure_render_cycles.exposure = 3
-configure_render_cycles.denoise = False
-configure_render_cycles.adaptive_threshold = 0.005
+configure_render_cycles.denoise = True #False
+configure_render_cycles.adaptive_threshold = 0.05 #0.005
 
 nishita_lighting.strength = 0.25
 nishita_lighting.sun_elevation = ("clip_gaussian", 40, 25, 6, 70)

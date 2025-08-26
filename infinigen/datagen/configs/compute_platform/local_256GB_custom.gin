@@ -4,7 +4,7 @@ manage_datagen_jobs.num_concurrent = 50
 
 get_cmd.process_niceness = 20 # let UI processes etc take precedence, to make the smooth and UI usable
 local_submit_cmd.use_scheduler = True
-LocalScheduleHandler.jobs_per_gpu = 15
+LocalScheduleHandler.jobs_per_gpu = 10
 jobs_to_launch_next.max_queued_total = 4
 jobs_to_launch_next.max_stuck_at_task = 50
 

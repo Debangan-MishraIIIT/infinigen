@@ -85,6 +85,7 @@ if __name__ == "__main__":
     parser.add_argument("frame", type=int)
     parser.add_argument("--query", type=str, default=None)
     parser.add_argument("--output", type=Path, default=Path("testbed"))
+    parser.add_argument("--overwrite_image", type=str, default=None)
     args = parser.parse_args()
 
     object_segmentation_mask = recover(
@@ -93,7 +94,10 @@ if __name__ == "__main__":
     instance_segmentation_mask = recover(
         np.load(get_frame_path(args.folder, 0, args.frame, "InstanceSegmentation_npz"))
     )
-    image = imread(get_frame_path(args.folder, 0, args.frame, "Image_png"))
+    if args.overwrite_image is None:
+        image = imread(get_frame_path(args.folder, 0, args.frame, "Image_png"))
+    else:
+        image = imread(args.overwrite_image)
     object_json = json.loads(
         get_frame_path(args.folder, 0, args.frame, "Objects_json").read_text()
     )
@@ -177,7 +181,7 @@ if __name__ == "__main__":
                         bbox_points_uv[indices[i]],
                         bbox_points_uv[indices[(i + 1) % 4]],
                         color=bbox["color"],
-                        thickness=1,
+                        thickness=2,
                     )
 
     args.output.mkdir(exist_ok=True)
