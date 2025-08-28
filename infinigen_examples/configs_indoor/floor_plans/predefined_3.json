@@ -1,0 +1,7 @@
+{
+  "rooms": {
+    "living-room_0/0": {
+      "shape": "shapely.box(0,0,5,5)"
+    }
+  }
+}
