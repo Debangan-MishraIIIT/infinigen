@@ -36,6 +36,11 @@ class FloorPlanSolver:
         iters_mult=200,
         **kwargs,
     ):
+        print("Line 39 - floor_plan.py - floor_plan:", floor_plan)
+        print("Line 40 - floor_plan.py - consgraph:", consgraph)
+        print("Line 41 - floor_plan.py - n_divide_trials:", n_divide_trials)
+        print("Line 42 - floor_plan.py - iters_mult:", iters_mult)
+        print("Line 43 - floor_plan.py - kwargs:", kwargs)
         self.factory_seed = factory_seed
         with FixedSeed(factory_seed):
             self.constants = consgraph.constants

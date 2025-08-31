@@ -670,12 +670,20 @@ class BaseDoorFactory(AssetFactory):
                 ["knob", "lever", "pull", "bar", "none"]
             )
 
+            # self.door_frame_style = np.random.choice(
+            #     [
+            #         "single_column",
+            #         "full_frame_square",
+            #         "full_frame_dome",
+            #         "full_frame_double_door",
+            #     ]
+            # )
             self.door_frame_style = np.random.choice(
                 [
                     "single_column",
                     "full_frame_square",
-                    "full_frame_dome",
-                    "full_frame_double_door",
+                    # "full_frame_dome",
+                    # "full_frame_double_door",
                 ]
             )
             self.door_frame_width = uniform(0.02, 0.06)

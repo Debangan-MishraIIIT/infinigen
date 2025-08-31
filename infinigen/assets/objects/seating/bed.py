@@ -21,11 +21,18 @@ from infinigen.core.util.random import random_general as rg
 
 class BedFactory(bedframe.BedFrameFactory):
     mattress_types = "weighted_choice", (1, "coiled"), (3, "wrapped")
+    # sheet_types = (
+    #     "weighted_choice",
+    #     (4, "quilt"),
+    #     (4, "comforter"),
+    #     (4, "box_comforter"),
+    #     (1, "none"),
+    # )
     sheet_types = (
         "weighted_choice",
-        (4, "quilt"),
-        (4, "comforter"),
-        (4, "box_comforter"),
+        (0, "quilt"),
+        (0, "comforter"),
+        (0, "box_comforter"),
         (1, "none"),
     )
 
@@ -93,10 +100,11 @@ class BedFactory(bedframe.BedFrameFactory):
         frame = super().create_asset(i=i, **params)
 
         mattress = self.make_mattress(i)
-        sheet = self.make_sheet(i, mattress, frame)
-        cover = self.make_cover(i, sheet, mattress)
+        # sheet = self.make_sheet(i, mattress, frame)
+        # cover = self.make_cover(i, sheet, mattress)
 
-        n_pillows = np.random.randint(2, 4)
+        # n_pillows = np.random.randint(2, 4)
+        n_pillows = 0
         if n_pillows > 0:
             pillow = self.pillow_factory(i)
             pillows = [pillow] + [deep_clone_obj(pillow) for _ in range(n_pillows - 1)]
@@ -111,9 +119,11 @@ class BedFactory(bedframe.BedFrameFactory):
             ],
             -1,
         )
-        self.scatter(pillows, points, [sheet, mattress])
+        # self.scatter(pillows, points, [sheet, mattress])
+        self.scatter(pillows, points, [mattress])
 
-        n_towels = np.random.randint(1, 2)
+        # n_towels = np.random.randint(1, 2)
+        n_towels = 0
         if n_towels > 0:
             towel = self.towel_factory(i)
             towels = [towel] + [deep_clone_obj(towel) for _ in range(n_towels - 1)]
@@ -128,9 +138,12 @@ class BedFactory(bedframe.BedFrameFactory):
             ],
             -1,
         )
-        self.scatter(towels, points, [sheet, mattress])
+        # self.scatter(towels, points, [sheet, mattress])
+        self.scatter(towels, points, [mattress])
 
-        for _ in [mattress, sheet, cover] + pillows + towels:
+        # for _ in [mattress, sheet, cover] + pillows + towels:
+        #     _.parent = frame
+        for _ in [mattress]:
             _.parent = frame
         butil.select_none()
         return frame

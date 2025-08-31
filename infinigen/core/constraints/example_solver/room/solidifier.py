@@ -82,7 +82,8 @@ combined_rooms = [
                 (0.3, "panoramic"),
                 (0.4, "door"),
             ),
-            "adjacent": ("weighted_choice", (0.5, "open"), (0.5, "door")),
+            # "adjacent": ("weighted_choice", (0.5, "open"), (0.5, "door")),
+            "adjacent": ("weighted_choice", (0.0, "open"), (1.0, "door")),
         },
     ),
     (
@@ -94,11 +95,15 @@ combined_rooms = [
         {
             "non-adjacent": (
                 "weighted_choice",
-                (0.3, "open"),
-                (0.3, "panoramic"),
-                (0.4, "door"),
+                # (0.3, "open"),
+                # (0.3, "panoramic"),
+                # (0.4, "door"),
+                (0.0, "open"),
+                (0.0, "panoramic"),
+                (1.0, "door"),
             ),
-            "adjacent": "open",
+            # "adjacent": "open",
+            "adjacent": "door",
         },
     ),
     (

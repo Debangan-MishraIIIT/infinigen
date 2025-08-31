@@ -287,4 +287,4 @@ def restrict_solving(
             f"restrict_solving filtered consgraph from {old_counts=} {new_counts=} using {consgraph_filters=}"
         )
 
-    return stages, problem, quantity_limits
+    return stages, problem, quantity_limits, restrict_parent_rooms

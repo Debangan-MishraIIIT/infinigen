@@ -170,7 +170,7 @@ decorative_metal = [
 
 furniture_leg = decorative_metal + [
     (wood.Wood, 1.0),
-    (ceramic.GlassVolume, 1.0),
+    (ceramic.GlassVolume, 0.0), #(ceramic.GlassVolume, 1.0),
     (plastic.PlasticRough, 1.0),
     (metal.BrushedBlackMetal, 3.0),
     (wood.BlackPlywood, 3.0),
@@ -186,12 +186,12 @@ table_top = [
     (wood.TiledWood, 1.0),
     (wood.Wood, 1.0),
     (plastic.PlasticRough, 0.5),
-    (ceramic.GlassVolume, 1.0),
+    (ceramic.GlassVolume, 0.0),# (ceramic.GlassVolume, 1.0),
 ]
 
 tableware = [
     (ceramic.Ceramic, 1.0),
-    (ceramic.Glass, 1.0),
+    (ceramic.Glass, 0.0),# (ceramic.Glass, 1.0),
     (plastic.Plastic, 1.0),
     (metal.MetalBasic, 1.0),
     (wood.Wood, 1.0),
@@ -236,7 +236,7 @@ large_seat_fabric = [
 
 rug_fabric = fabrics + [
     (fabric.Rug, 7.0),
-    (art.ArtRug, 5.0),
+    (art.ArtRug, 0.0), #(art.ArtRug, 5.0),
     (fabric.CoarseKnitFabric, 1.0),
 ]
 

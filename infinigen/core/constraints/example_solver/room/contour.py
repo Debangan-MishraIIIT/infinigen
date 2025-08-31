@@ -28,9 +28,11 @@ class ContourFactory:
     def __init__(self, consgraph):
         self.consgraph = consgraph
         self.constants = consgraph.constants
+
         self.n_trials = 1000
         self.long_prob = "bool", 0.5
-        self.corner_prob = "weighted_choice", (1, "round"), (2, "sharp"), (7, "none")
+        # self.corner_prob = "weighted_choice", (1, "round"), (2, "sharp"), (7, "none")
+        self.corner_prob = "weighted_choice", (0, "round"), (0, "sharp"), (1, "none")
         self.maximal_radius = 4
 
     def add_staircase(self, contour):

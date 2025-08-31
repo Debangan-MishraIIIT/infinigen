@@ -162,8 +162,9 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
 
     stages = default_greedy_stages()
     checks.check_all(consgraph, stages, all_vars)
+    
+    stages, consgraph, limits, restrict_parent_rooms = restrict_solving(stages, consgraph)
 
-    stages, consgraph, limits = restrict_solving(stages, consgraph)
 
     if overrides.get("restrict_single_supported_roomtype", False):
         restrict_parent_rooms = {
@@ -189,6 +190,28 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
         return solver.solve_rooms(scene_seed, consgraph_rooms, stages["rooms"])
 
     state: state_def.State = p.run_stage("solve_rooms", solve_rooms, use_chance=False)
+    
+    #########################################################
+    state.to_json(output_folder / "rooms.json")
+    # print("Line 193 - generate_indoors.py - state:", state)
+    # Check if room in restrict_parent_rooms in state, the polygon should have 5 vertices
+    restrict_parent_rooms_str = restrict_parent_rooms[0].lower()+"_0/0"
+    if restrict_parent_rooms_str == "livingroom_0/0":
+        restrict_parent_rooms_str = "living-room_0/0"
+    if restrict_parent_rooms_str == "diningroom_0/0":
+        restrict_parent_rooms_str = "dining-room_0/0"
+    
+    for room in state.objs.values():
+        print("Line 205 - generate_indoors.py - room:", room)
+        print("Line 206 - generate_indoors.py - restrict_parent_rooms:", restrict_parent_rooms)
+        print("Line 207 - generate_indoors.py - room.obj.name:", room.obj.name)
+        print("Line 208 - generate_indoors.py - restrict_parent_rooms_str:", restrict_parent_rooms_str)
+        if room.obj.name == restrict_parent_rooms_str:
+            print("Rectangluar Room Found!")
+            print("Line 210 - generate_indoors.py - room.polygon:", room.polygon)
+            assert len(room.polygon.exterior.coords) == 5, f"Room {room.obj.name} in restrict_parent_rooms should have 5 vertices"
+    #########################################################
+
 
     def solve_stage_name(stage_name: str, group: str, **kwargs):
         assigments = greedy.iterate_assignments(
@@ -246,7 +269,8 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
 
         # === TUNABLE PARAMETERS ===
         MIN_INTERSECTION_FRAC = 0.05
-        MAX_INTERSECTION_FRAC = 0.5
+        MAX_INTERSECTION_FRAC = 0.4
+        MIN_UNION_FRAC = 0.6
         SAMPLING_RESOLUTION = 0.3
         MAX_SEARCH_TRIES = 20
 
@@ -291,7 +315,7 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
             logger.info(f"Candidate pose has intersection fraction: {intersection_frac:.2%}")
 
             #########################################################
-            if union_frac >= 0.6 and intersection_frac <= 0.3 and intersection_frac >= 0.05:
+            if union_frac >= MIN_UNION_FRAC and intersection_frac <= MAX_INTERSECTION_FRAC and intersection_frac >= MIN_INTERSECTION_FRAC:
                 logger.info(f"SUCCESS! Found valid pose for Camera 2 with desired intersection.")
                 break
             #########################################################

@@ -47,7 +47,8 @@ def sample_home_constraint_params():
         # rare objects wont even be added to the constraint graph in most homes
         has_tv=uniform() < 0.5,
         has_aquarium_tank=uniform() < 0.15,
-        has_birthday_balloons=uniform() < 0.15,
+        # has_birthday_balloons=uniform() < 0.15,
+        has_birthday_balloons=False,
         has_cocktail_tables=uniform() < 0.15,
         has_kitchen_barstools=uniform() < 0.15,
     )
@@ -68,7 +69,7 @@ def home_room_constraints(has_fewer_rooms=False):
     constraints["node_gen"] = (
         rooms[Semantics.Root].all(
             lambda r: rooms[Semantics.LivingRoom]
-            .related_to(r, cl.Traverse())
+            # .related_to(r, cl.Traverse())
             .count()
             .in_range(1, 2, mean=1.1)
         )
@@ -80,7 +81,7 @@ def home_room_constraints(has_fewer_rooms=False):
         )
         * rooms[Semantics.LivingRoom].all(
             lambda r: rooms[Semantics.Bedroom]
-            .related_to(r, cl.Traverse())
+            # .related_to(r, cl.Traverse())
             .count()
             .in_range(0, 2, mean=1.2)
         )
@@ -92,7 +93,7 @@ def home_room_constraints(has_fewer_rooms=False):
         )
         * rooms[Semantics.LivingRoom].all(
             lambda r: rooms[Semantics.Bathroom]
-            .related_to(r, cl.Traverse())
+            # .related_to(r, cl.Traverse())
             .count()
             .in_range(0, 1, mean=0.4)
         )
@@ -104,7 +105,7 @@ def home_room_constraints(has_fewer_rooms=False):
         )
         * rg[Semantics.LivingRoom].all(
             lambda r: rooms[Semantics.DiningRoom]
-            .related_to(r, cl.Traverse())
+            # .related_to(r, cl.Traverse())
             .count()
             .in_range(0, 1, mean=0.8)
         )
@@ -224,40 +225,59 @@ def home_room_constraints(has_fewer_rooms=False):
         constraints["node_gen"] = (
             rooms[Semantics.Root].all(
                 lambda r: rooms[Semantics.LivingRoom]
-                .related_to(r, cl.Traverse())
+                # .related_to(r, cl.Traverse())
                 .count()
-                .in_range(1, 2, mean=1.1)
+                # .in_range(1, 2, mean=1.1)
+                .in_range(1, 1, mean=1.0)
             )
             * rooms[Semantics.LivingRoom].all(
                 lambda r: rooms[Semantics.Bedroom]
-                .related_to(r, cl.Traverse())
+                # .related_to(r, cl.Traverse())
                 .count()
-                .in_range(1, 2, mean=1.2)
+                # .in_range(1, 2, mean=1.2)
+                .in_range(1, 1, mean=1.0)
             )
             * rooms[Semantics.LivingRoom].all(
                 lambda r: rooms[Semantics.Entrance]
-                .related_to(r, cl.Traverse())
+                # .related_to(r, cl.Traverse())
                 .count()
                 .in_range(1, 1, mean=1)
             )
             * rooms[Semantics.LivingRoom].all(
                 lambda r: rooms[Semantics.Bathroom]
-                .related_to(r, cl.Traverse())
+                # .related_to(r, cl.Traverse())
                 .count()
                 .in_range(1, 1, mean=1)
             )
             * rg[Semantics.LivingRoom].all(
                 lambda r: rooms[Semantics.DiningRoom]
-                .related_to(r, cl.Traverse())
+                # .related_to(r, cl.Traverse())
                 .count()
                 .in_range(1, 1, mean=1.0)
             )
             * rooms[Semantics.DiningRoom].all(
                 lambda r: rooms[Semantics.Kitchen]
-                .related_to(r, cl.Traverse())
+                # .related_to(r, cl.Traverse())
                 .count()
                 .in_range(1, 1, mean=1.0)
             )
+            * rooms[Semantics.LivingRoom].all(
+                lambda r: rooms[Semantics.Bathroom]
+                .related_to(r, -cl.Traverse())
+                .count()
+                .equals(0)
+            )
+            # * rooms[Semantics.Bathroom].all(
+            #     lambda r: rooms[Semantics.Bedroom]
+            #     .related_to(r, cl.Traverse())
+            #     .count()
+            #     .in_range(1, 1, mean=1.0)
+            # )
+            # * rooms[Semantics.Bathroom].all(
+            #     lambda r: (
+            #         rooms.related_to(r, cl.Traverse()).count().equals(1)
+            #     )
+            # )
         )
 
     # endregion
@@ -314,15 +334,15 @@ def home_room_constraints(has_fewer_rooms=False):
             rooms[Semantics.StaircaseRoom].count()
             == (1 if constants.n_stories > 1 else 0)
         )
-        * rooms[Semantics.Bedroom].all(
-            lambda r: ~private_bathroom(r) + ~private_bathroom_via_closet(r)
-        )
-        * rooms[Semantics.Bedroom].all(
-            lambda r: private_bathroom(r)
-            + private_bathroom_via_closet(r)
-            + public_bathroom_via_hallway(r)
-            + public_bathroom_via_living_room(r)
-        )
+        # * rooms[Semantics.Bedroom].all(
+        #     lambda r: ~private_bathroom(r) + ~private_bathroom_via_closet(r)
+        # )
+        # * rooms[Semantics.Bedroom].all(
+        #     lambda r: private_bathroom(r)
+        #     + private_bathroom_via_closet(r)
+        #     + public_bathroom_via_hallway(r)
+        #     + public_bathroom_via_living_room(r)
+        # )
     )
     if has_fewer_rooms:
         node_constraint = (
@@ -335,6 +355,28 @@ def home_room_constraints(has_fewer_rooms=False):
         )
 
     constraints["node"] = node_constraint
+
+    ############ ADDED CONSTRAINTS ##########################
+    # Add this in the constraints section, not in score_terms
+    constraints["rectangular_rooms"] = rooms[-Semantics.Hallway][-Semantics.StaircaseRoom].all(
+        lambda r: r.n_verts() == 4  # Must have exactly 4 vertices
+    )
+
+    # constraints["bathroom_connectivity"] = rooms[Semantics.Bathroom].all(
+    #     lambda r: (
+    #         # Count how many rooms this bathroom is connected to via Traverse
+    #         rooms.related_to(r, cl.Traverse()).count().equals(1)
+    #     )
+    # )
+
+    # Ensure living rooms are strictly rectangular
+    constraints["living_room_rectangular"] = rooms[Semantics.LivingRoom].all(
+        lambda r: (
+            r.n_verts() == 4  # Must have exactly 4 vertices
+            # * (r.convexity() > 0.99)  # Must be very close to convex
+        )
+    )
+    ############ ADDED CONSTRAINTS ##########################
 
     all_rooms = cl.scene()[Semantics.RoomContour]
     rooms = all_rooms[-Semantics.Exterior][-Semantics.Staircase]
@@ -400,6 +442,9 @@ def home_room_constraints(has_fewer_rooms=False):
         + rooms[-Semantics.Hallway]
         .sum(lambda r: (r.n_verts() - 6).clip(0).pow(1.5))
         .minimize(weight=1.0)
+        # + rooms[-Semantics.Hallway][-Semantics.StaircaseRoom]######################
+        # .sum(lambda r: (r.n_verts() - 4).clip(0).pow(2))######################
+        # .minimize(weight=50000.0)######################
         + sum(
             rooms[tag].sum(
                 lambda r: r.shared_length(exterior(r)) / exterior(r).length()

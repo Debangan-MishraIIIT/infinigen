@@ -30,10 +30,17 @@ from infinigen.core.util.random import random_general as rg
 
 class BedFrameFactory(ChairFactory):
     scale = 1.0
+    # leg_decor_types = (
+    #     "weighted_choice",
+    #     (2, "coiled"),
+    #     (2, "pad"),
+    #     (1, "plain"),
+    #     (2, "legs"),
+    # )
     leg_decor_types = (
         "weighted_choice",
         (2, "coiled"),
-        (2, "pad"),
+        (0, "pad"),
         (1, "plain"),
         (2, "legs"),
     )

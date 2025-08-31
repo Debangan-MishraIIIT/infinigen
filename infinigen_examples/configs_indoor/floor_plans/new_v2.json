@@ -1,0 +1,51 @@
+{
+    "rooms": {
+      "living-room_0/0": {
+        "shape": "shapely.box(0, 0, 7, 6)"
+      },
+      "dining-room_0/0": {
+        "shape": "shapely.box(0, 6, 7, 12)"
+      },
+      "kitchen_0/0": {
+        "shape": "shapely.box(7, 6, 11, 14)"
+        },
+      "bedroom_0/0": {
+        "shape": "shapely.box(7, 2, 13, 6)"
+        },
+      "bathroom_0/0": {
+        "shape": "shapely.box(11, 6, 14, 11)"
+        }
+    },
+    "doors": {
+      "door_living_dining": {
+        "shape": "shapely.LineString([(2, 6), (4, 6)])"
+      },
+      "door_living_bed": {
+        "shape": "shapely.LineString([(7, 3), (7, 5)])"
+      },
+      "door_dining_kitchen": {
+        "shape": "shapely.LineString([(7, 9), (7, 11)])"
+      },
+      "door_bed_bath": {
+        "shape": "shapely.LineString([(11.2, 6), (13, 6)])"
+      }
+    },
+    "windows": {
+      "win_living_south": {
+        "shape": "shapely.LineString([(2, 0), (5, 0)])"
+      },
+      "win_bed_south": {
+        "shape": "shapely.LineString([(8, 2), (12, 2)])"
+      },
+      "win_dining_west": {
+        "shape": "shapely.LineString([(0, 8), (0, 11)])"
+      },
+      "win_kitchen_north": {
+        "shape": "shapely.LineString([(8, 14), (10, 14)])"
+      },
+      "win_bath_east": {
+        "shape": "shapely.LineString([(14, 8), (14, 11)])"
+      }
+    }
+  }
+  

@@ -1,0 +1,32 @@
+{
+    "rooms": {
+      "living-room_0/0": {
+        "shape": "shapely.box(0, 0, 6, 7)"
+      },
+      "kitchen_0/0": {
+        "shape": "shapely.box(6, 10, 10, 16)"
+      },
+      "bedroom_0/0": {
+        "shape": "shapely.box(6, 0, 12, 8)"
+      },
+      "bathroom_0/0": {
+        "shape": "shapely.box(6, 8, 12, 10)"
+      },
+      "dining-room_0/0": {
+        "shape": "shapely.box(0, 8, 6, 16)"
+      }
+    },
+    "doors": {
+      "door": {
+        "shape": "shapely.LineString([(2, 8), (4, 8)])"
+      },
+      "door.001": {
+        "shape": "shapely.LineString([(6, 6), (8, 6)])"
+      }
+    },
+    "windows": {
+      "window": {
+        "shape": "shapely.LineString([(0, 2), (0, 6)])"
+      }
+    }
+  }
