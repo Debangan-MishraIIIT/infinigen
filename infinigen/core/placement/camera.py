@@ -355,14 +355,26 @@ def camera_pose_proposal(
     elif altitude is None:
         loc = location_sample()
     else:
+        print("Line 359 - camera.py - location_sample()")
         loc = location_sample()
         curr_alt = animation_policy.get_altitude(loc, scene_bvh)
         if curr_alt is None:
             logger.debug(f"camera_pose_proposal got {curr_alt=} for {loc=}")
             # butil.spawn_empty("fail")
             return None
+
+        ##########################
+        # altitude = ("uniform", 2.0, 2.0)
+        altitude = ("uniform", 1.5, 1.5)
+        ##########################
+        
         desired_alt = random_general(altitude)
         loc[2] = loc[2] + desired_alt - curr_alt
+
+        ##########################
+        # print("Line 377 - camera.py - desired_alt:", desired_alt)
+        # print("Line 378 - camera.py - loc[2]:", loc[2])
+        ##########################
 
     if center_coordinate:
         direction = loc - Vector(center_coordinate)
@@ -377,9 +389,19 @@ def camera_pose_proposal(
         yaw += np.random.uniform(-noise_range, noise_range)
         rot = np.array([roll, pitch, yaw])
     else:
+        pitch_sample = 90.0
+        # pitch_sample = random_general(pitch)
+        roll_sample = random_general(roll)
+        yaw_sample = random_general(yaw)
         rot = np.deg2rad(
-            [random_general(pitch), random_general(roll), random_general(yaw)]
+            [pitch_sample, roll_sample, yaw_sample]
         )
+        ##########################
+        print("Line 397 - camera.py - pitch_sample:", pitch_sample)
+        print("Line 398 - camera.py - roll_sample:", roll_sample)
+        print("Line 399 - camera.py - yaw_sample:", yaw_sample)
+        print("Line 400 - camera.py - rot:", rot)
+        ##########################
     focal_length = random_general(focal_length)
     return CameraProposal(loc, rot, focal_length)
 
