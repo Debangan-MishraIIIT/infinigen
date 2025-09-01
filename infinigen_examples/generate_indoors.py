@@ -210,6 +210,22 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
             print("Rectangluar Room Found!")
             print("Line 210 - generate_indoors.py - room.polygon:", room.polygon)
             assert len(room.polygon.exterior.coords) == 5, f"Room {room.obj.name} in restrict_parent_rooms should have 5 vertices"
+
+    
+    if restrict_parent_rooms_str == "bathroom_0/0":
+        for room in state.objs.values():
+            if room.obj.name == "bathroom_0/0":
+                door_count = 0
+                for relation in room.relations:
+                    # print("Line 220 - generate_indoors.py - relation.relation:", relation.relation)
+                    # print("Line 221 - generate_indoors.py - relation.relation.connector_types:", relation.relation.connector_types)
+                    # print("Line 222 - generate_indoors.py - relation.relation.connector_types values:", relation.relation.connector_types)
+                    if any(connector.value == 'door' for connector in relation.relation.connector_types):
+                        # print("Line 224 - generate_indoors.py - door found")
+                        door_count += 1
+                assert door_count == 1, f"Bathroom {room.obj.name} should have 1 door"
+                # print("Line 226 - generate_indoors.py - bathroom door_count:", door_count)
+
     #########################################################
 
 

@@ -24,6 +24,7 @@ from copy import copy
 from datetime import datetime
 from pathlib import Path
 from shutil import which
+import shutil
 
 import gin
 import numpy as np
@@ -486,6 +487,18 @@ def record_crashed_seed(scene, taskname, f, fatal=True):
     f.write(text)
 
     scene[f"{taskname}_crash_recorded"] = True
+
+    #########################################################
+    # delete directory with crashed scene
+    try:
+        scene_folder = args.output_folder / seed
+        shutil.rmtree(
+            scene_folder
+        )
+        print(f"Deleted {scene_folder}")
+    except:
+        print(f"Failed to delete {scene_folder}")
+    #########################################################
 
     return reason
 

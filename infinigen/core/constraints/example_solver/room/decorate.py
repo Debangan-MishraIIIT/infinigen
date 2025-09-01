@@ -155,14 +155,14 @@ room_wall_alternative_fns = {
         (2, "none"),
         (1, "half"),
         *([(v, k) for k, v in material_assignments.wall_plaster]),
-        *([(v, k) for k, v in material_assignments.abstract_art]),
+        # *([(v, k) for k, v in material_assignments.abstract_art]),
     ),
     t.Semantics.Bedroom: (
         "weighted_choice",
         (2, "none"),
         (1, "half"),
         *([(v, k) for k, v in material_assignments.wall_plaster]),
-        *([(v, k) for k, v in material_assignments.abstract_art]),
+        # *([(v, k) for k, v in material_assignments.abstract_art]),
     ),
     t.Semantics.Office: (
         "weighted_choice",

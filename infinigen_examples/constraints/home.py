@@ -362,13 +362,6 @@ def home_room_constraints(has_fewer_rooms=False):
         lambda r: r.n_verts() == 4  # Must have exactly 4 vertices
     )
 
-    # constraints["bathroom_connectivity"] = rooms[Semantics.Bathroom].all(
-    #     lambda r: (
-    #         # Count how many rooms this bathroom is connected to via Traverse
-    #         rooms.related_to(r, cl.Traverse()).count().equals(1)
-    #     )
-    # )
-
     # Ensure living rooms are strictly rectangular
     constraints["living_room_rectangular"] = rooms[Semantics.LivingRoom].all(
         lambda r: (
@@ -422,7 +415,8 @@ def home_room_constraints(has_fewer_rooms=False):
             + rooms[Semantics.StaircaseRoom].sum(
                 lambda r: (r.area() / 25).log().hinge(0, 0.4).pow(2)
             )
-        ).minimize(weight=500.0)
+        ).minimize(weight=5000.0)
+        # ).minimize(weight=500.0)
         + sum(
             rooms[tag].sum(lambda r: r.aspect_ratio().log())
             for tag in [
@@ -698,6 +692,13 @@ def home_furniture_constraints():
             )
         )
     )
+
+    #########################################################
+    constraints["no_mirrors_in_kitchen"] = rooms[Semantics.Kitchen].all(
+        lambda r: mirror.related_to(r).count().equals(0)
+    )
+    #########################################################
+
     score_terms["wall_decorations"] = rooms.mean(
         lambda r: (
             walldec.related_to(r).mean(
