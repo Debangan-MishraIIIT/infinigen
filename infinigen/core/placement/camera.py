@@ -110,6 +110,125 @@ def calculate_view_fractions(room_bbox, cam1, cam2, resolution=0.1):
 
     return union_fraction, intersection_fraction
 
+import bpy
+import re
+from mathutils import Vector
+from bpy_extras.object_utils import world_to_camera_view
+
+# --- Global Configuration ---
+
+# Words to exclude from the final list
+EXCLUDE_KEYWORDS = ["camera", "camrig"]
+MIN_VISIBLE_CORNERS = 3
+
+# The minimum number of an object's 8 bounding box corners that must be visible
+# for the object to be considered "visible".
+# Increase for more strictness, decrease for less.
+
+
+# ---------------------------------------------------
+# Reused Helper Functions
+# ---------------------------------------------------
+
+def is_excluded(obj_name: str) -> bool:
+    """Check if object name contains any of the excluded keywords."""
+    lname = obj_name.lower()
+    return any(keyword in lname for keyword in EXCLUDE_KEYWORDS)
+
+def clean_name(name: str) -> str:
+    """Remove suffixes, split camel case, and strip whitespace for a clean name."""
+    # Remove Blender's .001, .002, etc. suffixes
+    name = re.sub(r'\.\d+$', '', name)
+    # Remove anything after 'Factory' if it exists
+    name = re.split(r'Factory', name, maxsplit=1)[0]
+    # Separate camel case (e.g., CellShelf -> Cell Shelf)
+    name = re.sub(r'(?<!^)(?=[A-Z])', ' ', name)
+    return name.strip()
+
+def check_visibility(depsgraph, scene, camera, target_obj) -> bool:
+    """
+    Counts visible bounding box corners to determine if an object is visible.
+    An object is considered visible if the count of its visible corners meets
+    the MIN_VISIBLE_CORNERS threshold.
+    """
+    # Get the 8 corners of the object's bounding box in world space
+    points_to_check = [target_obj.matrix_world @ Vector(corner) for corner in target_obj.bound_box]
+    cam_world_loc = camera.matrix_world.translation
+    visible_corners_count = 0
+
+    for point in points_to_check:
+        # Condition 1: Check if the point is within the camera's view frame
+        coords_in_cam_view = world_to_camera_view(scene, camera, point)
+        is_in_frustum = (0.0 <= coords_in_cam_view.x <= 1.0 and
+                         0.0 <= coords_in_cam_view.y <= 1.0 and
+                         coords_in_cam_view.z > 0)
+
+        if not is_in_frustum:
+            continue
+
+        # Condition 2: Check if the view to this point is blocked (occluded)
+        direction = point - cam_world_loc
+        if direction.length_squared == 0:
+            continue
+
+        result, location, _, _, _, _ = depsgraph.scene.ray_cast(
+            depsgraph=depsgraph,
+            origin=cam_world_loc,
+            direction=direction.normalized()
+        )
+
+        # A corner is visible if the ray hits nothing, or if the first thing it
+        # hits is at or behind the corner itself (allowing for float precision).
+        is_occluded = result and (location - cam_world_loc).length < direction.length - 1e-6
+
+        if not is_occluded:
+            visible_corners_count += 1
+
+    return visible_corners_count >= MIN_VISIBLE_CORNERS
+
+
+# ---------------------------------------------------
+# NEW Integrated Function
+# ---------------------------------------------------
+
+def get_visible_objects_per_camera(cam1: bpy.types.Object, cam2: bpy.types.Object) -> tuple[list[str], list[str]]:
+    """
+    Analyzes the scene to find all objects visible by each of the two provided cameras.
+    (Docstring remains the same)
+    """
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    scene = bpy.context.scene
+
+    cameras = {cam1: [], cam2: []}
+    name_counts = {}
+
+    print("Starting visibility check for all mesh objects...")
+
+    for obj in bpy.data.objects:
+        if obj.type != 'MESH' or is_excluded(obj.name):
+            continue
+
+        # --- FIX: Generate the unique name ONCE per object ---
+        cleaned_name = clean_name(obj.name)
+        count = name_counts.get(cleaned_name, 0) + 1
+        name_counts[cleaned_name] = count
+
+        # A slightly simpler way to decide if a number is needed
+        # This checks if other objects share the same base name.
+        needs_numbering = any(o != obj and clean_name(o.name) == cleaned_name for o in bpy.data.objects)
+        unique_name = f"{cleaned_name} {count}" if needs_numbering else cleaned_name
+        # --------------------------------------------------------
+
+        # Now, check visibility for each camera using the SAME unique name
+        for cam, visible_list in cameras.items():
+            if check_visibility(depsgraph, scene, cam, obj):
+                # Add the pre-determined unique name to this camera's list
+                if unique_name not in visible_list:
+                    visible_list.append(unique_name)
+
+    print("Visibility check complete.")
+    return cameras[cam1], cameras[cam2]
+
 @gin.configurable
 def get_sensor_coords(cam, H, W, sparse=False):
     camd = cam.data
