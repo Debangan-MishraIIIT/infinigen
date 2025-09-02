@@ -248,11 +248,11 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
         MIN_INTERSECTION_FRAC = 0.05
         MAX_INTERSECTION_FRAC = 0.5
 
-        MIN_INTERSECTION_COUNT = 3
+        MIN_INTERSECTION_COUNT = 2
         MAX_INTERSECTION_COUNT = 10
 
         SAMPLING_RESOLUTION = 0.3
-        MAX_SEARCH_TRIES = 50
+        MAX_SEARCH_TRIES = 25
 
         room_bbox = solved_bbox
         def reusable_pose_cameras(rigs_to_pose):
@@ -288,7 +288,7 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
             reusable_pose_cameras(cam_rig_1)
             reusable_pose_cameras(cam_rig_2)
 
-            _, intersection_frac = placement.camera.calculate_view_fractions(
+            union_frac, intersection_frac = placement.camera.calculate_view_fractions(
                 room_bbox, cam1, cam2, resolution=SAMPLING_RESOLUTION
             )
             logger.info(f"Candidate pose has intersection fraction: {intersection_frac:.2%}")
@@ -501,6 +501,19 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
 
     # state.print()
     state.to_json(output_folder / "solve_state.json")
+
+    import json
+    scene_data = {
+        "common_objects_count": intersection_count,
+        "cam1_visible": objects_visible_cam1,
+        "cam2_visible": objects_visible_cam2,
+        "union_fraction": union_frac,
+        "intersection_fraction": intersection_frac
+    }
+    with open("scene_info.json", "w") as f:
+        json.dump(scene_data, f, indent=4)
+    logger.info("Successfully wrote scene information to scene_info.json")
+
 
     def turn_off_lights():
         for o in bpy.data.objects:
