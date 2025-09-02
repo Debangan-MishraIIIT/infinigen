@@ -476,7 +476,7 @@ def camera_pose_proposal(
     elif altitude is None:
         loc = location_sample()
     else:
-        print("Line 359 - camera.py - location_sample()")
+        # print("Line 359 - camera.py - location_sample()")
         loc = location_sample()
         curr_alt = animation_policy.get_altitude(loc, scene_bvh)
         if curr_alt is None:
@@ -518,10 +518,10 @@ def camera_pose_proposal(
             [pitch_sample, roll_sample, yaw_sample]
         )
         ##########################
-        print("Line 397 - camera.py - pitch_sample:", pitch_sample)
-        print("Line 398 - camera.py - roll_sample:", roll_sample)
-        print("Line 399 - camera.py - yaw_sample:", yaw_sample)
-        print("Line 400 - camera.py - rot:", rot)
+        # print("Line 397 - camera.py - pitch_sample:", pitch_sample)
+        # print("Line 398 - camera.py - roll_sample:", roll_sample)
+        # print("Line 399 - camera.py - yaw_sample:", yaw_sample)
+        # print("Line 400 - camera.py - rot:", rot)
         ##########################
     focal_length = random_general(focal_length)
     return CameraProposal(loc, rot, focal_length)

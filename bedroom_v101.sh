@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=Bedroom-v101
 #SBATCH --partition=long
-#SBATCH -c 96
+#SBATCH -c 48
 #SBATCH --output=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_output/bedroom_v101_job_output-%j.txt
 #SBATCH --error=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_error/bedroom_v101_job_error-%j.txt
 #SBATCH --ntasks=1
