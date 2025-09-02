@@ -489,15 +489,14 @@ def record_crashed_seed(scene, taskname, f, fatal=True):
     scene[f"{taskname}_crash_recorded"] = True
 
     #########################################################
-    # delete directory with crashed scene
-    try:
-        scene_folder = args.output_folder / seed
-        shutil.rmtree(
-            scene_folder
-        )
-        print(f"Deleted {scene_folder}")
-    except:
-        print(f"Failed to delete {scene_folder}")
+    # delete directory with crashed scene (only for fatal crashes)
+    if fatal:
+        try:
+            scene_folder = args.output_folder / seed
+            shutil.rmtree(scene_folder)
+            print(f"Deleted crashed scene directory: {scene_folder}")
+        except Exception as e:
+            print(f"Failed to delete {scene_folder}: {e}")
     #########################################################
 
     return reason

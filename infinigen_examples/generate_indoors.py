@@ -288,7 +288,12 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
         MAX_INTERSECTION_FRAC = 0.4
         MIN_UNION_FRAC = 0.6
         SAMPLING_RESOLUTION = 0.3
-        MAX_SEARCH_TRIES = 20
+        MAX_SEARCH_TRIES = 5 #10
+
+        #########################################################-------------
+        MIN_INTERSECTION_COUNT = 1 #3
+        MAX_INTERSECTION_COUNT = 50 #10
+        #########################################################-------------
 
         room_bbox = solved_bbox
         def reusable_pose_cameras(rigs_to_pose):
@@ -316,12 +321,17 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
         cam1 = cam_rig_1[0].children[0]
         cam2 = cam_rig_2[0].children[0]
 
-        logger.info("Placing Camera 1...")
-        reusable_pose_cameras(cam_rig_1)
-        logger.info(f"Placed Camera 1 at {cam1.location.to_tuple(2)}")
+        ##### logger.info("Placing Camera 1...")
+        ##### reusable_pose_cameras(cam_rig_1)
+        ##### logger.info(f"Placed Camera 1 at {cam1.location.to_tuple(2)}")
 
         for i in range(MAX_SEARCH_TRIES):
             logger.info(f"Attempt {i+1}/{MAX_SEARCH_TRIES} to place Camera 2...")
+
+            #########################################################-------------
+            logger.info("Placing Cameras...")
+            reusable_pose_cameras(cam_rig_1)
+            #########################################################-------------
             reusable_pose_cameras(cam_rig_2)
 
             union_frac, intersection_frac = placement.camera.calculate_view_fractions(
@@ -330,16 +340,59 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
             logger.info(f"Candidate pose has union fraction: {union_frac:.2%}")
             logger.info(f"Candidate pose has intersection fraction: {intersection_frac:.2%}")
 
+            #########################################################-------------
+            print("=========================########################################################===========================")
+            objects_visible_cam1, objects_visible_cam2 = placement.camera.get_visible_objects_per_camera(cam1, cam2)
+            set_cam1 = set(objects_visible_cam1)
+            set_cam2 = set(objects_visible_cam2)
+            intersection_set = set_cam1 & set_cam2
+            intersection_count = len(intersection_set)
+            #########################################################-------------
+
             #########################################################
             if union_frac >= MIN_UNION_FRAC and intersection_frac <= MAX_INTERSECTION_FRAC and intersection_frac >= MIN_INTERSECTION_FRAC:
-                logger.info(f"SUCCESS! Found valid pose for Camera 2 with desired intersection.")
-                break
+            #####    logger.info(f"SUCCESS! Found valid pose for Camera 2 with desired intersection.")
+            #####    break
+
+            #########################################################-------------
+                logger.info("Volume fraction OK. Proceeding to detailed object visibility check...")
+
+                # --- STAGE 2: Detailed check using visible object count ---
+                # This part only runs if the first check passed
+                objects_visible_cam1, objects_visible_cam2 = placement.camera.get_visible_objects_per_camera(cam1, cam2)
+
+                intersection_set = set(objects_visible_cam1) & set(objects_visible_cam2)
+                intersection_count = len(intersection_set)
+                print(f"Objects visible from Camera 1: {objects_visible_cam1}")
+                print(f"Objects visible from Camera 2: {objects_visible_cam2}")
+
+
+                logger.info(f"Found {intersection_count} shared visible objects.")
+
+                # Check if the object count is within the desired range
+                if MIN_INTERSECTION_COUNT <= intersection_count <= MAX_INTERSECTION_COUNT:
+                    logger.info(f"SUCCESS! Found valid pose satisfying all criteria.")
+                    logger.info(f"  - Volume Fraction: {intersection_frac:.2%}")
+                    logger.info(f"  - Shared Objects: {intersection_count}")
+                    break
+                else:
+                    logger.warning(f"  - Failed object count check (Count: {intersection_count}, Required: [{MIN_INTERSECTION_COUNT}-{MAX_INTERSECTION_COUNT}]).")
+            else:
+                logger.warning(f"  - Failed union fraction check (Fraction: {union_frac:.2%}, Required: [>{MIN_UNION_FRAC:.2%}.")
+                logger.warning(f"  - Failed volume fraction check (Fraction: {intersection_frac:.2%}, Required: [{MIN_INTERSECTION_FRAC:.2%}-{MAX_INTERSECTION_FRAC:.2%}]).")
+            #########################################################-------------
+
+
+
             #########################################################
             # if MIN_INTERSECTION_FRAC <= intersection_frac <= MAX_INTERSECTION_FRAC:
             #     logger.info(f"SUCCESS! Found valid pose for Camera 2 with desired intersection.")
             #     break
             #########################################################
         else:
+            #########################################################-------------
+            butil.delete(cam_rig_1)
+            #########################################################-------------
             butil.delete(cam_rig_2)
             raise RuntimeError(f"Failed to find a suitable pose for Camera 2 after {MAX_SEARCH_TRIES} tries.")
         camera_rigs = cam_rig_1 + cam_rig_2
