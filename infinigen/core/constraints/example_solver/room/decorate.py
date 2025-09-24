@@ -348,6 +348,7 @@ def populate_doors(
     door_chance=1,
     casing_chance=0.0,
     all_open=False,
+    all_closed=True
 ):
     factories = [
         random_door_factory()(np.random.randint(1e7), constants=constants)
@@ -380,6 +381,9 @@ def populate_doors(
                 else:
                     rot_z = uniform(0, 1)
             rot_z *= np.pi / 2
+
+            if all_closed:
+                rot_z = 0
 
             door = factory(int(j))
             door.parent = placeholders[j]
