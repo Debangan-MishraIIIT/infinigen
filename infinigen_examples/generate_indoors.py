@@ -47,6 +47,7 @@ from infinigen.core.util.test_utils import (
     import_item,
     load_txt_list,
 )
+from infinigen.assets.composition.material_logger import init_material_logger
 from infinigen.terrain import Terrain
 from infinigen.tools.convert_displacement import convert_shader_displacement
 from infinigen_examples.constraints import home as home_constraints
@@ -137,6 +138,9 @@ all_vars = [cu.variable_room, cu.variable_obj]
 @gin.configurable
 def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
     p = pipeline.RandomStageExecutor(scene_seed, output_folder, overrides)
+    
+    # Initialize material logger
+    init_material_logger(output_folder)
 
     logger.debug(overrides)
 

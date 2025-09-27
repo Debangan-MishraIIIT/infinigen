@@ -13,8 +13,13 @@ from infinigen.assets.materials.wood.plywood import (
     shader_shelves_white,
     shader_shelves_wood,
     shader_shelves_wood_z,
+    shader_shelves_blue,
+    shader_shelves_green,
+    shader_shelves_red,
+    shader_shelves_yellow,
 )
 from infinigen.assets.objects.shelves.utils import nodegroup_tagged_cube
+from infinigen.assets.composition.material_logger import log_material_choice
 from infinigen.core import surface, tagging
 from infinigen.core.nodes import node_utils
 from infinigen.core.nodes.node_wrangler import Nodes, NodeWrangler
@@ -804,10 +809,25 @@ class LargeShelfBaseFactory(AssetFactory):
         params = self.update_translation_params(params)
         if params.get("frame_material", None) is None:
             params["frame_material"] = np.random.choice(
-                ["white", "black_wood", "wood"], p=[0.4, 0.3, 0.3]
+                ["white", "black_wood", "wood", "blue", "green", "red", "yellow"], p=[0.15, 0.15, 0.14, 0.14, 0.14, 0.14, 0.14]
             )
+            # Log the chosen frame material
+            log_material_choice(
+                factory_seed=self.factory_seed,
+                factory_name="large_shelf",
+                material_type="frame_material",
+                material_value=params["frame_material"]
+            )
+            
         if params.get("board_material", None) is None:
             params["board_material"] = params["frame_material"]
+            # Log the chosen board material
+            log_material_choice(
+                factory_seed=self.factory_seed,
+                factory_name="large_shelf",
+                material_type="board_material",
+                material_value=params["board_material"]
+            )
 
         params = self.get_material_func(params)
         params["tag_support"] = True
@@ -826,6 +846,22 @@ class LargeShelfBaseFactory(AssetFactory):
             params["frame_material"] = surface.shaderfunc_to_material(
                 shader_shelves_wood_z
             )
+        elif params["frame_material"] == "blue":
+            params["frame_material"] = surface.shaderfunc_to_material(
+                shader_shelves_blue
+            )
+        elif params["frame_material"] == "green":
+            params["frame_material"] = surface.shaderfunc_to_material(
+                shader_shelves_green
+            )
+        elif params["frame_material"] == "red":
+            params["frame_material"] = surface.shaderfunc_to_material(
+                shader_shelves_red
+            )
+        elif params["frame_material"] == "yellow":
+            params["frame_material"] = surface.shaderfunc_to_material(
+                shader_shelves_yellow
+            )
 
         if params["board_material"] == "white":
             params["board_material"] = surface.shaderfunc_to_material(
@@ -838,6 +874,22 @@ class LargeShelfBaseFactory(AssetFactory):
         elif params["board_material"] == "wood":
             params["board_material"] = surface.shaderfunc_to_material(
                 shader_shelves_wood
+            )
+        elif params["board_material"] == "blue":
+            params["board_material"] = surface.shaderfunc_to_material(
+                shader_shelves_blue
+            )
+        elif params["board_material"] == "green":
+            params["board_material"] = surface.shaderfunc_to_material(
+                shader_shelves_green
+            )
+        elif params["board_material"] == "red":
+            params["board_material"] = surface.shaderfunc_to_material(
+                shader_shelves_red
+            )
+        elif params["board_material"] == "yellow":
+            params["board_material"] = surface.shaderfunc_to_material(
+                shader_shelves_yellow
             )
 
         return params

@@ -7,6 +7,7 @@ import bpy
 import numpy as np
 from numpy.random import normal, uniform
 
+from infinigen.assets.composition.material_logger import log_material_choice
 from infinigen.assets.materials.wood.plywood import get_shelf_material
 from infinigen.assets.objects.shelves.utils import nodegroup_tagged_cube
 from infinigen.core import surface, tagging
@@ -829,8 +830,27 @@ class SimpleBookcaseBaseFactory(AssetFactory):
         params["attach_width"] = uniform(0.01, 0.04)
         params["attach_top_length"] = uniform(0.03, 0.1)
         params["attach_back_length"] = uniform(0.02, 0.05)
-        params["frame_material"] = get_shelf_material("white")
+
+        frame_mat = np.random.choice(
+            ["white", "black_wood", "wood", "blue", "green", "red", "yellow"], p=[0.14, 0.14, 0.15, 0.15, 0.14, 0.14, 0.14]
+        )
+        params["frame_material"] = get_shelf_material(frame_mat)
+        
         params["metal_material"] = get_shelf_material("metal")
+        
+        # Log the chosen materials
+        log_material_choice(
+            factory_seed=self.factory_seed,
+            factory_name="simple_bookcase",
+            material_type="frame_material",
+            material_value=frame_mat
+        )
+        log_material_choice(
+            factory_seed=self.factory_seed,
+            factory_name="simple_bookcase",
+            material_type="metal_material",
+            material_value="metal"
+        )
         params["tag_support"] = True
         return params
 

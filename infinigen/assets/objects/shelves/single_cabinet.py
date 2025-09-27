@@ -7,6 +7,7 @@ import bpy
 import numpy as np
 from numpy.random import normal, randint, uniform
 
+from infinigen.assets.composition.material_logger import log_material_choice
 from infinigen.assets.objects.shelves.doors import CabinetDoorBaseFactory
 from infinigen.assets.objects.shelves.large_shelf import LargeShelfBaseFactory
 from infinigen.assets.utils.object import new_bbox
@@ -125,7 +126,14 @@ class SingleCabinetBaseFactory(AssetFactory):
             params = self.mat_params.copy()
             if params.get("frame_material", None) is None:
                 params["frame_material"] = np.random.choice(
-                    ["white", "black_wood", "wood"], p=[0.5, 0.2, 0.3]
+                    ["white", "black_wood", "wood", "blue", "green", "red", "yellow"], p=[0.14, 0.14, 0.14, 0.14, 0.15, 0.15, 0.14]
+                )
+                # Log the chosen frame material for single cabinet
+                log_material_choice(
+                    factory_seed=self.factory_seed,
+                    factory_name="single_cabinet",
+                    material_type="frame_material",
+                    material_value=params["frame_material"]
                 )
             return params
 

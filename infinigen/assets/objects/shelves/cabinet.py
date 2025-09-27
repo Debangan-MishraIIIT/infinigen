@@ -14,6 +14,7 @@ from infinigen.assets.objects.elements.doors.joint_utils import (
     nodegroup_hinge_joint,
 )
 from infinigen.assets.objects.shelves.large_shelf import LargeShelfBaseFactory
+from infinigen.assets.composition.material_logger import log_material_choice
 from infinigen.core import surface
 from infinigen.core.nodes import node_utils
 from infinigen.core.nodes.node_wrangler import Nodes, NodeWrangler
@@ -1462,7 +1463,14 @@ class CabinetDoorBaseFactory(AssetFactory):
 
         if params.get("frame_material", None) is None:
             params["frame_material"] = np.random.choice(
-                ["white", "black_wood", "wood", "glass", "metal"]
+                ["white", "black_wood", "wood", "glass", "metal", "blue", "green", "red", "yellow"]
+            )
+            # Log the chosen frame material
+            log_material_choice(
+                factory_seed=self.factory_seed,
+                factory_name="cabinet_door",
+                material_type="frame_material",
+                material_value=params["frame_material"]
             )
         if params.get("board_material", None) is None:
             if params["has_mid_ramp"]:
@@ -1473,6 +1481,14 @@ class CabinetDoorBaseFactory(AssetFactory):
                 params["board_material"] = [lower_mat, upper_mat]
             else:
                 params["board_material"] = [params["frame_material"]]
+            # Log the chosen board materials
+            for i, mat in enumerate(params["board_material"]):
+                log_material_choice(
+                    factory_seed=self.factory_seed,
+                    factory_name="cabinet_door",
+                    material_type=f"board_material_{i}",
+                    material_value=mat
+                )
 
         params = self.get_material_func(params)
         return params
@@ -1583,7 +1599,14 @@ class CabinetBaseFactory(AssetFactory):
             params = self.mat_params.copy()
             if params.get("frame_material", None) is None:
                 params["frame_material"] = np.random.choice(
-                    ["white", "black_wood", "wood"], p=[0.5, 0.2, 0.3]
+                    ["white", "black_wood", "wood", "blue", "green", "red", "yellow"], p=[0.14, 0.14, 0.14, 0.14, 0.14, 0.14, 0.14]
+                )
+                # Log the chosen frame material for cabinet
+                log_material_choice(
+                    factory_seed=self.factory_seed,
+                    factory_name="cabinet",
+                    material_type="frame_material",
+                    material_value=params["frame_material"]
                 )
             return params
 

@@ -8,12 +8,17 @@ import numpy as np
 from numpy.random import normal, randint, uniform
 
 from infinigen.assets.composition import material_assignments
+from infinigen.assets.composition.material_logger import log_material_choice
 from infinigen.assets.materials.wood.plywood import (
     shader_shelves_black_metallic,
     shader_shelves_black_wood,
     shader_shelves_white,
     shader_shelves_white_metallic,
     shader_shelves_wood,
+    shader_shelves_blue,
+    shader_shelves_green,
+    shader_shelves_red,
+    shader_shelves_yellow,
 )
 from infinigen.assets.objects.shelves.utils import nodegroup_tagged_cube
 from infinigen.assets.utils.object import new_bbox
@@ -1455,6 +1460,13 @@ class CellShelfBaseFactory(AssetFactory):
                 params["base_material"] = np.random.choice(
                     ["black", "white"], p=[0.4, 0.6]
                 )
+                # Log the chosen base material
+                log_material_choice(
+                    factory_seed=self.factory_seed,
+                    factory_name="cell_shelf",
+                    material_type="base_material",
+                    material_value=params["base_material"]
+                )
         else:
             params["base_leg_height"] = 0.0
             params["base_leg_size"] = 0.0
@@ -1463,7 +1475,14 @@ class CellShelfBaseFactory(AssetFactory):
             params["attachment_size"] = np.clip(normal(0.05, 0.02), 0.02, 0.1)
         if params.get("wood_material", None) is None:
             params["wood_material"] = np.random.choice(
-                ["black_wood", "white", "wood"], p=[0.3, 0.2, 0.5]
+                ["black_wood", "white", "wood", "blue", "green", "red", "yellow"], p=[0.15, 0.14, 0.14, 0.14, 0.14, 0.14, 0.15]
+            )
+            # Log the chosen wood material
+            log_material_choice(
+                factory_seed=self.factory_seed,
+                factory_name="cell_shelf",
+                material_type="wood_material",
+                material_value=params["wood_material"]
             )
         params["tag_support"] = True
         params = self.get_material_func(params, randomness=True)
@@ -1481,6 +1500,22 @@ class CellShelfBaseFactory(AssetFactory):
         elif params["wood_material"] == "wood":
             params["wood_material"] = surface.shaderfunc_to_material(
                 shader_shelves_wood
+            )
+        elif params["wood_material"] == "blue":
+            params["wood_material"] = surface.shaderfunc_to_material(
+                shader_shelves_blue
+            )
+        elif params["wood_material"] == "green":
+            params["wood_material"] = surface.shaderfunc_to_material(
+                shader_shelves_green
+            )
+        elif params["wood_material"] == "red":
+            params["wood_material"] = surface.shaderfunc_to_material(
+                shader_shelves_red
+            )
+        elif params["wood_material"] == "yellow":
+            params["wood_material"] = surface.shaderfunc_to_material(
+                shader_shelves_yellow
             )
         else:
             raise NotImplementedError
