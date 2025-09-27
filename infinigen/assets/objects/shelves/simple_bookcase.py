@@ -8,6 +8,7 @@ import numpy as np
 from numpy.random import normal, uniform
 
 from infinigen.assets.composition.material_logger import log_material_choice
+from infinigen.assets.composition.color_uniqueness_manager import get_unique_color
 from infinigen.assets.materials.wood.plywood import get_shelf_material
 from infinigen.assets.objects.shelves.utils import nodegroup_tagged_cube
 from infinigen.core import surface, tagging
@@ -834,9 +835,9 @@ class SimpleBookcaseBaseFactory(AssetFactory):
         frame_mat = np.random.choice(
             ["white", "black_wood", "wood", "blue", "green", "red", "yellow"], p=[0.14, 0.14, 0.15, 0.15, 0.14, 0.14, 0.14]
         )
-        params["frame_material"] = get_shelf_material(frame_mat)
+        params["frame_material"] = frame_mat  # Store as string for now, will be converted to material in spawn_asset
         
-        params["metal_material"] = get_shelf_material("metal")
+        params["metal_material"] = "metal"  # Store as string for now, will be converted to material in spawn_asset
         
         # Log the chosen materials
         log_material_choice(
@@ -854,6 +855,29 @@ class SimpleBookcaseBaseFactory(AssetFactory):
         params["tag_support"] = True
         return params
 
+    def asset_parameters(self, distance, vis_distance):
+        """Override asset_parameters to include color uniqueness logic."""
+        # Get base parameters
+        base_params = super().asset_parameters(distance, vis_distance)
+        
+        # Get asset-specific parameters
+        asset_params = self.get_asset_params(0)  # Use 0 as default for asset_parameters
+        
+        # Check for color uniqueness and change if necessary
+        original_frame_color = asset_params.get("frame_material", "white")
+        unique_frame_color = get_unique_color(original_frame_color, "simple_bookcase", self.factory_seed)
+        
+        if original_frame_color != unique_frame_color:
+            print(f"Color conflict resolved: simple_bookcase changed from '{original_frame_color}' to '{unique_frame_color}'")
+            asset_params["frame_material"] = unique_frame_color
+        
+        # Convert material strings to actual Blender materials
+        asset_params["frame_material"] = get_shelf_material(asset_params["frame_material"])
+        asset_params["metal_material"] = get_shelf_material(asset_params["metal_material"])
+        
+        # Merge base and asset parameters
+        return {**base_params, **asset_params}
+
     def create_asset(self, i=0, **params):
         bpy.ops.mesh.primitive_plane_add(
             size=1,
@@ -864,9 +888,8 @@ class SimpleBookcaseBaseFactory(AssetFactory):
         )
         obj = bpy.context.active_object
 
-        obj_params = self.get_asset_params(i)
         surface.add_geomod(
-            obj, geometry_nodes, apply=True, attributes=[], input_kwargs=obj_params
+            obj, geometry_nodes, apply=True, attributes=[], input_kwargs=params
         )
         tagging.tag_system.relabel_obj(obj)
 

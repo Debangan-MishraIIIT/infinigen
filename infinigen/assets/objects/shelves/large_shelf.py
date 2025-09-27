@@ -20,6 +20,7 @@ from infinigen.assets.materials.wood.plywood import (
 )
 from infinigen.assets.objects.shelves.utils import nodegroup_tagged_cube
 from infinigen.assets.composition.material_logger import log_material_choice
+from infinigen.assets.composition.color_uniqueness_manager import get_unique_color
 from infinigen.core import surface, tagging
 from infinigen.core.nodes import node_utils
 from infinigen.core.nodes.node_wrangler import Nodes, NodeWrangler
@@ -832,6 +833,35 @@ class LargeShelfBaseFactory(AssetFactory):
         params = self.get_material_func(params)
         params["tag_support"] = True
         return params
+
+    def spawn_asset(self, i, **kwargs):
+        """Override spawn_asset to ensure color uniqueness at final scene level."""
+        # Get the asset parameters using the parent's method
+        distance = kwargs.get('distance', None)
+        vis_distance = kwargs.get('vis_distance', 0)
+        if distance is None:
+            from infinigen.core.placement.detail import scatter_res_distance
+            distance = scatter_res_distance()
+        
+        params = self.asset_parameters(distance, vis_distance)
+        params.update(kwargs)
+        
+        # Check for color uniqueness and change if necessary
+        original_frame_color = params.get("frame_material", "white")
+        unique_frame_color = get_unique_color(original_frame_color, "large_shelf", self.factory_seed)
+        
+        if original_frame_color != unique_frame_color:
+            print(f"Color conflict resolved: large_shelf changed from '{original_frame_color}' to '{unique_frame_color}'")
+            params["frame_material"] = unique_frame_color
+            params["board_material"] = unique_frame_color  # Update board material to match
+        
+        # Update kwargs with the potentially modified parameters
+        kwargs.update(params)
+        
+        # Call the parent spawn_asset method
+        result = super().spawn_asset(i, **kwargs)
+        
+        return result
 
     def get_material_func(self, params, randomness=True):
         if params["frame_material"] == "white":

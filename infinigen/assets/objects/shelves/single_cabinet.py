@@ -8,6 +8,7 @@ import numpy as np
 from numpy.random import normal, randint, uniform
 
 from infinigen.assets.composition.material_logger import log_material_choice
+from infinigen.assets.composition.color_uniqueness_manager import get_unique_color
 from infinigen.assets.objects.shelves.doors import CabinetDoorBaseFactory
 from infinigen.assets.objects.shelves.large_shelf import LargeShelfBaseFactory
 from infinigen.assets.utils.object import new_bbox
@@ -304,6 +305,34 @@ class SingleCabinetBaseFactory(AssetFactory):
 
         tagging.tag_system.relabel_obj(obj)
         return obj
+
+    def spawn_asset(self, i, **kwargs):
+        """Override spawn_asset to ensure color uniqueness at final scene level."""
+        # Get the asset parameters using the parent's method
+        distance = kwargs.get('distance', None)
+        vis_distance = kwargs.get('vis_distance', 0)
+        if distance is None:
+            from infinigen.core.placement.detail import scatter_res_distance
+            distance = scatter_res_distance()
+        
+        params = self.asset_parameters(distance, vis_distance)
+        params.update(kwargs)
+        
+        # Check for color uniqueness and change if necessary
+        original_frame_color = params.get("frame_material", "white")
+        unique_frame_color = get_unique_color(original_frame_color, "single_cabinet", self.factory_seed)
+        
+        if original_frame_color != unique_frame_color:
+            print(f"Color conflict resolved: single_cabinet changed from '{original_frame_color}' to '{unique_frame_color}'")
+            params["frame_material"] = unique_frame_color
+        
+        # Update kwargs with the potentially modified parameters
+        kwargs.update(params)
+        
+        # Call the parent spawn_asset method
+        result = super().spawn_asset(i, **kwargs)
+        
+        return result
 
 
 class SingleCabinetFactory(SingleCabinetBaseFactory):
