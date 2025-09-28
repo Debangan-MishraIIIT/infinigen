@@ -40,6 +40,74 @@ def shader_shelves_white(nw: NodeWrangler, **kwargs):
         attrs={"is_active_output": True},
     )
 
+def shader_shelves_blue(nw: NodeWrangler, **kwargs):
+   # Code generated using version 2.6.4 of the node_transpiler
+   rgb = kwargs.get("rgb", [0.54, 0.57, 0.7])
+   base_color = (*rgb, 1.0)
+   principled_bsdf = nw.new_node(
+       Nodes.PrincipledBSDF,
+       input_kwargs={
+           "Base Color": base_color,
+           "Roughness": kwargs.get("roughness", 0.9),
+       },
+   )
+   material_output = nw.new_node(
+       Nodes.MaterialOutput,
+       input_kwargs={"Surface": principled_bsdf},
+       attrs={"is_active_output": True},
+   )
+  
+def shader_shelves_green(nw: NodeWrangler, **kwargs):
+   # Code generated using version 2.6.4 of the node_transpiler
+   rgb = kwargs.get("rgb", [0.38, 0.47, 0.24])
+   base_color = (*rgb, 1.0)
+   principled_bsdf = nw.new_node(
+       Nodes.PrincipledBSDF,
+       input_kwargs={
+           "Base Color": base_color,
+           "Roughness": kwargs.get("roughness", 0.9),
+       },
+   )
+   material_output = nw.new_node(
+       Nodes.MaterialOutput,
+       input_kwargs={"Surface": principled_bsdf},
+       attrs={"is_active_output": True},
+   )
+
+def shader_shelves_red(nw: NodeWrangler, **kwargs):
+   # Code generated using version 2.6.4 of the node_transpiler
+   rgb = kwargs.get("rgb", [0.40, 0.15, 0.18])
+   base_color = (*rgb, 1.0)
+   principled_bsdf = nw.new_node(
+       Nodes.PrincipledBSDF,
+       input_kwargs={
+           "Base Color": base_color,
+           "Roughness": kwargs.get("roughness", 0.9),
+       },
+   )
+   material_output = nw.new_node(
+       Nodes.MaterialOutput,
+       input_kwargs={"Surface": principled_bsdf},
+       attrs={"is_active_output": True},
+   )
+  
+def shader_shelves_yellow(nw: NodeWrangler, **kwargs):
+   # Code generated using version 2.6.4 of the node_transpiler
+   rgb = kwargs.get("rgb", [0.76, 0.66, 0.29])
+   base_color = (*rgb, 1.0)
+   principled_bsdf = nw.new_node(
+       Nodes.PrincipledBSDF,
+       input_kwargs={
+           "Base Color": base_color,
+           "Roughness": kwargs.get("roughness", 0.9),
+       },
+   )
+   material_output = nw.new_node(
+       Nodes.MaterialOutput,
+       input_kwargs={"Surface": principled_bsdf},
+       attrs={"is_active_output": True},
+   )
+
 
 def shader_shelves_white_sampler():
     params = dict()
