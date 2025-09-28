@@ -30,7 +30,7 @@ from infinigen.core.util.math import int_hash
 from infinigen.core.util.organization import Task
 from infinigen.terrain.core import Terrain
 from infinigen.tools.export import export_scene, triangulate_meshes
-from infinigen.core.mat_rnd import material_change_fix
+from infinigen.core.mat_rnd import apply_custom_stages
 
 logger = logging.getLogger(__name__)
 
@@ -305,7 +305,7 @@ def execute_tasks(
                     filepath=str(output_folder / output_blend_name)
                 )
                 if Task.Coarse in task:
-                    material_change_fix(output_folder / output_blend_name)
+                    apply_custom_stages(output_folder / output_blend_name)
                     logging.info(f"Material change fix completed for {output_folder / output_blend_name}")
 
         tag_system.save_tag(path=str(output_folder / "MaskTag.json"))

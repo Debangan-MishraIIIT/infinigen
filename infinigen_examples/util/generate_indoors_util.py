@@ -152,6 +152,12 @@ def overhead_view(cam, room_name):
 
 
 def hide_other_rooms(state, rooms_split, keep_rooms: list[str]):
+
+    for o in bpy.data.objects:
+        if "skirtingboard" in o.name:
+            o.hide_viewport = True
+            o.hide_render = True
+    
     for col in rooms_split.values():
         for o in col.objects:
             if any(roomname.split(".")[0] in o.name for roomname in keep_rooms):

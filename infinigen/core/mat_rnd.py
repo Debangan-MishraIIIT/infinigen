@@ -13,18 +13,48 @@ from infinigen.assets.materials.wood.plywood import (
 import numpy as np
 
 
-def material_change_fix(blend_file):
+def apply_custom_stages(blend_file):
+    from pathlib import Path
+    blend_file = Path(blend_file)
+
+    print(f"Loading blend file: {blend_file}")
+    bpy.ops.wm.open_mainfile(filepath=str(blend_file))
+    print("Blend file loaded successfully")
+
+    # Run material change fix
+    material_change_fix()
+    print("Material change fix completed")
+
+    # Save the blend file with different name
+    save_path = blend_file.parent / f"{blend_file.stem}.blend"
+    bpy.ops.wm.save_as_mainfile(filepath=str(save_path))
+    print(f"Saved blend file to: {save_path}")
+
+
+def delete_other_rooms():
+    """
+    Delete all objects in other rooms.
+    """
+    room_name = "bedroom"
+    print("Deleting other rooms...")
+    for obj in bpy.data.objects:
+        if obj.name.startswith("Room"):
+            bpy.data.objects.remove(obj)
+    print("Other rooms deleted")
+
+
+def material_change_fix():
     """
     Collect all objects in furniture categories and assign them different material colors.
     """
     # Convert blend_file to Path object if it's a string
-    from pathlib import Path
-    blend_file = Path(blend_file)
+    # from pathlib import Path
+    # blend_file = Path(blend_file)
     
-    # Load the blend file first
-    print(f"Loading blend file: {blend_file}")
-    bpy.ops.wm.open_mainfile(filepath=str(blend_file))
-    print("Blend file loaded successfully")
+    # # Load the blend file first
+    # print(f"Loading blend file: {blend_file}")
+    # bpy.ops.wm.open_mainfile(filepath=str(blend_file))
+    # print("Blend file loaded successfully")
     
     # Define the categories to target
     target_categories = [
@@ -65,7 +95,7 @@ def material_change_fix(blend_file):
     # Define color mappings for each shader function
     shader_colors = {
         shader_shelves_white: [0.9, 0.9, 0.9],
-        shader_shelves_yellow: [0.76, 0.66, 0.29],
+        shader_shelves_yellow: [0.95, 0.85, 0.4],
         shader_shelves_red: [0.40, 0.15, 0.18],
         shader_shelves_blue: [0.54, 0.57, 0.9],
         shader_shelves_green: [0.38, 0.47, 0.24],
@@ -133,7 +163,7 @@ def material_change_fix(blend_file):
     
     print(f"Material assignment completed for {len(target_objects)} objects")
 
-    # Save the blend file with different name
-    save_path = blend_file.parent / f"{blend_file.stem}.blend"
-    bpy.ops.wm.save_as_mainfile(filepath=str(save_path))
-    print(f"Saved blend file to: {save_path}")
+    # # Save the blend file with different name
+    # save_path = blend_file.parent / f"{blend_file.stem}.blend"
+    # bpy.ops.wm.save_as_mainfile(filepath=str(save_path))
+    # print(f"Saved blend file to: {save_path}")
