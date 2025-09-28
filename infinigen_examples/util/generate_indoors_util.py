@@ -179,7 +179,8 @@ def hide_other_rooms(state, rooms_split, keep_rooms: list[str]):
     for o in hide_cutters:
         o.hide_render = True
         o.hide_viewport = True
-    bpy.context.scene.render.film_transparent = True
+    # bpy.context.scene.render.film_transparent = True
+    bpy.context.scene.render.film_transparent = False
 
 
 def apply_greedy_restriction(

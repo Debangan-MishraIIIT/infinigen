@@ -388,9 +388,9 @@ def populate_doors(
             door = factory(int(j))
             door.parent = placeholders[j]
             door.location = (
-                constants.door_width / 2,
-                constants.wall_thickness / 2,
-                -constants.door_size / 2,
+                (constants.door_width / 2) - 0.02,
+                0, #constants.wall_thickness / 2,
+                (-constants.door_size / 2) + 0.045, #0.04
             )
 
             door.rotation_euler[-1] = -rot_z
@@ -443,7 +443,7 @@ def populate_windows(
         butil.put_in_collection(list(butil.iter_object_tree(window)), col)
 
         window.parent = cutter
-        window.location[1] = -constants.wall_thickness / 2
+        window.location[1] = 0 #-constants.wall_thickness / 2
         window.rotation_euler[1] = np.pi
         windows.append(window)
         factory.finalize_assets(windows)

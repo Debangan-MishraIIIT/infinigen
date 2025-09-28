@@ -27,7 +27,8 @@ class PointLampFactory(AssetFactory):
         super().__init__(factory_seed)
         with FixedSeed(factory_seed):
             self.params = {
-                "Wattage": U(40, 100),
+                # "Wattage": U(40, 100),
+                "Wattage": U(200, 300),
                 "Radius": U(0.02, 0.03),
                 "Temperature": clip_gaussian(4700, 700, 3500, 6500),
             }
