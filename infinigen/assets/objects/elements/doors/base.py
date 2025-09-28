@@ -654,7 +654,7 @@ class BaseDoorFactory(AssetFactory):
             self.height = constants.door_size
             self.constants = constants
             self.depth = constants.wall_thickness * log_uniform(0.25, 0.5)
-            self.panel_margin = log_uniform(0.08, 0.12)
+            self.panel_margin = log_uniform(0.02, 0.06) #log_uniform(0.08, 0.12)
             self.bevel_width = uniform(0.005, 0.01)
             self.out_bevel = uniform() < 0.7
             self.shrink_width = log_uniform(0.005, 0.06)

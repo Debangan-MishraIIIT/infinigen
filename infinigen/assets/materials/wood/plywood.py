@@ -42,7 +42,7 @@ def shader_shelves_white(nw: NodeWrangler, **kwargs):
 
 def shader_shelves_blue(nw: NodeWrangler, **kwargs):
    # Code generated using version 2.6.4 of the node_transpiler
-   rgb = kwargs.get("rgb", [0.54, 0.57, 0.7])
+   rgb = kwargs.get("rgb", [0.22, 0.24, 0.9])
    base_color = (*rgb, 1.0)
    principled_bsdf = nw.new_node(
        Nodes.PrincipledBSDF,

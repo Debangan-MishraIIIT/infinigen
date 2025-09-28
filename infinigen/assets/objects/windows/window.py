@@ -128,8 +128,10 @@ class WindowFactory(AssetFactory):
         self, dimensions=None, open=None, curtain=None, shutter=None
     ):
         if dimensions is None:
+            # width = U(1, 3)
             width = U(1, 4)
-            height = U(1, 4)
+            # height = U(1, 4)
+            height = U(1, 3)
             frame_thickness = U(0.05, 0.15) * min(width, height)
         else:
             width, height, frame_thickness = dimensions
@@ -213,12 +215,12 @@ class WindowFactory(AssetFactory):
             "Height": height,
             "FrameWidth": frame_width,
             "FrameThickness": frame_thickness,
-            "PanelHAmount": panel_h_amount,
-            "PanelVAmount": panel_v_amount,
+            "PanelHAmount": panel_h_amount, #1
+            "PanelVAmount": panel_v_amount, #1
             "SubFrameWidth": sub_frame_width,
             "SubFrameThickness": sub_frame_thickness,
-            "SubPanelHAmount": sub_frame_h_amount,
-            "SubPanelVAmount": sub_frame_v_amount,
+            "SubPanelHAmount": sub_frame_h_amount, #1
+            "SubPanelVAmount": sub_frame_v_amount, #1
             "GlassThickness": glass_thickness,
             "OpenHAngle": open_h_angle,
             "OpenVAngle": open_v_angle,
