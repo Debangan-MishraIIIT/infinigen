@@ -17,9 +17,9 @@ conda activate infinigen
 
 
 python -m infinigen.datagen.manage_jobs \
-    --output_folder outputs/LivingRoom_v201_testing_58 \
+    --output_folder outputs/LivingRoom_v201_testing_55_full \
     --num_scenes 400 \
-    --configs fast_solve.gin singleroom.gin studio.gin \
+    --configs singleroom.gin studio.gin \
     --pipeline_overrides \
         get_cmd.driver_script=infinigen_examples.generate_indoors \
         LocalScheduleHandler.use_gpu=True \
@@ -28,7 +28,7 @@ python -m infinigen.datagen.manage_jobs \
         compose_indoors.terrain_enabled=False \
         restrict_solving.restrict_parent_rooms=\[\"LivingRoom\"\] \
         compose_indoors.place_2=True \
-        compose_indoors.solve_small_enabled=False \
+        compose_indoors.solve_small_enabled=True \
     --pipeline_configs \
         local_256GB_custom.gin \
         monocular.gin \

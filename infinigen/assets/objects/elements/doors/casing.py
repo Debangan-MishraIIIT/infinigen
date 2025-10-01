@@ -30,7 +30,8 @@ class DoorCasingFactory(AssetFactory):
             self.margin = constants.door_size * uniform(0.05, 0.1)
             self.extrude = uniform(0.02, 0.08)
             self.bevel_all_sides = uniform() < 0.3
-            self.surface = np.random.choice([metal, wood])
+            # self.surface = np.random.choice([metal, wood])
+            self.surface = np.random.choice([wood])
             self.metal_color = colors.metal_hsv()
 
     def create_asset(self, **params) -> bpy.types.Object:

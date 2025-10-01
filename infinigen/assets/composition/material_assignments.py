@@ -67,7 +67,7 @@ fabrics = [
 plastics = [
     (plastic.Plastic, 1.0),
     (plastic.PlasticRough, 1.0),
-    (plastic.PlasticTranslucent, 1.0),
+    (plastic.PlasticTranslucent, 0.0), #1.0
 ]
 
 hard_materials = [
@@ -83,13 +83,29 @@ hard_materials = [
     (wood.BlondePlywood, 2.0),
     (plastic.Plastic, 1.0),
     (plastic.PlasticRough, 1.0),
-    (plastic.PlasticTranslucent, 1.0),
+    (plastic.PlasticTranslucent, 0.0), #1.0
+]
+
+door_no_metal_hard_materials = [
+    # (metal.MetalBasic, 1.0),
+    # (metal.BrushedMetal, 1.0),
+    # (metal.GalvanizedMetal, 1.0),
+    # (metal.GrainedMetal, 1.0),
+    # (metal.HammeredMetal, 1.0),
+    # (metal.BrushedBlackMetal, 1.0),
+    (wood.Wood, 2.0),
+    (wood.WhitePlywood, 2.0),
+    (wood.BlackPlywood, 2.0),
+    (wood.BlondePlywood, 2.0),
+    (plastic.Plastic, 1.0),
+    (plastic.PlasticRough, 1.0),
+    # (plastic.PlasticTranslucent, 1.0),
 ]
 
 metal_plastic = metal_neutral + [
     (plastic.Plastic, 1.0),
     (plastic.PlasticRough, 1.0),
-    (plastic.PlasticTranslucent, 1.0),
+    (plastic.PlasticTranslucent, 0.0), #1.0
 ]
 
 shelf_board = (
@@ -201,7 +217,7 @@ curtain = [
     (fabric.FineKnitFabric, 1.0),
     (wood.Wood, 2.0),
     (plastic.PlasticRough, 2.0),
-    (ceramic.GlassVolume, 0.5),
+    (ceramic.GlassVolume, 0.0), #(ceramic.GlassVolume, 0.5),
     (lamp_shaders.LampShade, 2.0),
 ]
 
@@ -249,9 +265,11 @@ decorative_hard = (  # vases, plantpots
     decorative_metal
     + [
         (ceramic.VaseCeramic, 4.0),
-        (ceramic.ColoredGlass, 2.0),
+        # (ceramic.ColoredGlass, 2.0),
+        (ceramic.ColoredGlass, 0.0),
         (ceramic.Marble, 1.0),
-        (ceramic.GlassVolume, 2.0),
+        # (ceramic.GlassVolume, 2.0),
+        (ceramic.GlassVolume, 0.0),
         (ceramic.Ceramic, 1.0),
     ]
 )
@@ -259,13 +277,13 @@ decorative_hard = (  # vases, plantpots
 cup = decorative_hard + [
     (metal.MetalBasic, 2.0),
     (plastic.Plastic, 5.0),
-    (plastic.PlasticTranslucent, 5.0),
+    (plastic.PlasticTranslucent, 0.0), #5.0
     (ceramic.Glass, 3.0),
 ]
 jar = [
     (ceramic.Glass, 8.0),
     (plastic.Plastic, 2.0),
-    (plastic.PlasticTranslucent, 2.0),
+    (plastic.PlasticTranslucent, 0.0), #2.0
     (ceramic.VaseCeramic, 2.0),
     (ceramic.ColoredGlass, 2.0),
     (ceramic.Marble, 1.0),
@@ -280,7 +298,7 @@ step = (
     + marble
     + [
         (plastic.Plastic, 1.0),
-        (plastic.PlasticTranslucent, 1.0),
+        (plastic.PlasticTranslucent, 0.0), #1.0
     ]
 )
 rail = step

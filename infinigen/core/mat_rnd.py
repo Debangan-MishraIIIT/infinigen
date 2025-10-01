@@ -97,7 +97,7 @@ def material_change_fix():
         shader_shelves_white: [0.9, 0.9, 0.9],
         shader_shelves_yellow: [0.95, 0.85, 0.4],
         shader_shelves_red: [0.40, 0.15, 0.18],
-        shader_shelves_blue: [0.22, 0.24, 0.9],
+        shader_shelves_blue: [0.13, 0.23, 0.37],
         shader_shelves_green: [0.38, 0.47, 0.24],
         shader_shelves_black_wood: [0.02, 0.002, 0.002],
         shader_shelves_wood: [0.4, 0.3, 0.2]  # Brown wood color

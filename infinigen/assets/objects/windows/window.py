@@ -128,7 +128,6 @@ class WindowFactory(AssetFactory):
         self, dimensions=None, open=None, curtain=None, shutter=None
     ):
         if dimensions is None:
-            # width = U(1, 3)
             width = U(1, 4)
             # height = U(1, 4)
             height = U(1, 3)
@@ -160,6 +159,11 @@ class WindowFactory(AssetFactory):
             shutter = U(0, 1) < 0.2
         if curtain is None:
             curtain = U(0, 1) < 0.3
+
+        curtain = True
+        if shutter:
+            curtain = False
+
         if curtain:
             open = False
 
@@ -191,15 +195,15 @@ class WindowFactory(AssetFactory):
         shutter_panel_radius = U(0.001, 0.003)
         shutter_width = U(0.03, 0.05)
         shutter_thickness = U(0.003, 0.007)
-        shutter_rotation = U(0, 1)
+        shutter_rotation = 0.7 #0.5 #U(0, 1)
         shutter_inverval = shutter_width + U(0.001, 0.003)
 
         curtain_frame_depth = U(0.05, 0.1)
         curtain_depth = U(0.03, curtain_frame_depth)
         curtain_interval_number = int(width / U(0.08, 0.2))
         curtain_frame_radius = U(0.01, 0.02)
-        curtain_mid_l = -U(0, width / 2)
-        curtain_mid_r = U(0, width / 2)
+        curtain_mid_l = -U(0, width / 3) #-U(0, width / 2)
+        curtain_mid_r = U(0, width / 3) #U(0, width / 2)
 
         shader_frame_material_choice = weighted_sample(material_assignments.woods)()()
 
@@ -215,12 +219,12 @@ class WindowFactory(AssetFactory):
             "Height": height,
             "FrameWidth": frame_width,
             "FrameThickness": frame_thickness,
-            "PanelHAmount": panel_h_amount, #1
-            "PanelVAmount": panel_v_amount, #1
+            "PanelHAmount": 1, #panel_h_amount, #1
+            "PanelVAmount": 1, #panel_v_amount, #1
             "SubFrameWidth": sub_frame_width,
             "SubFrameThickness": sub_frame_thickness,
-            "SubPanelHAmount": sub_frame_h_amount, #1
-            "SubPanelVAmount": sub_frame_v_amount, #1
+            "SubPanelHAmount": 1, #sub_frame_h_amount, #1
+            "SubPanelVAmount": 1, #sub_frame_v_amount, #1
             "GlassThickness": glass_thickness,
             "OpenHAngle": open_h_angle,
             "OpenVAngle": open_v_angle,

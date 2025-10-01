@@ -697,6 +697,15 @@ def home_furniture_constraints():
     constraints["no_mirrors_in_kitchen"] = rooms[Semantics.Kitchen].all(
         lambda r: mirror.related_to(r).count().equals(0)
     )
+    constraints["no_mirrors_in_bedroom"] = rooms[Semantics.Bedroom].all(
+        lambda r: mirror.related_to(r).count().equals(0)
+    )
+    constraints["no_mirrors_in_livingroom"] = rooms[Semantics.LivingRoom].all(
+        lambda r: mirror.related_to(r).count().equals(0)
+    )
+    constraints["no_mirrors_in_diningroom"] = rooms[Semantics.DiningRoom].all(
+        lambda r: mirror.related_to(r).count().equals(0)
+    )
     #########################################################
 
     score_terms["wall_decorations"] = rooms.mean(

@@ -399,6 +399,9 @@ def metal_hsv():
         log_uniform(0.02, 0.5),
     )
 
+def metal_hsv_custom():
+    return metal_natural_hsv()
+
 
 def white_hsv():
     return (

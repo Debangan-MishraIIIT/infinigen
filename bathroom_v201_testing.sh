@@ -17,7 +17,7 @@ conda activate infinigen
 
 
 python -m infinigen.datagen.manage_jobs \
-    --output_folder outputs/LivingRoom_v201_testing_58 \
+    --output_folder outputs/Bathroom_v201_testing_42 \
     --num_scenes 400 \
     --configs fast_solve.gin singleroom.gin studio.gin \
     --pipeline_overrides \
@@ -26,7 +26,7 @@ python -m infinigen.datagen.manage_jobs \
         iterate_scene_tasks.n_camera_rigs=2 \
     --overrides \
         compose_indoors.terrain_enabled=False \
-        restrict_solving.restrict_parent_rooms=\[\"LivingRoom\"\] \
+        restrict_solving.restrict_parent_rooms=\[\"Bathroom\"\] \
         compose_indoors.place_2=True \
         compose_indoors.solve_small_enabled=False \
     --pipeline_configs \

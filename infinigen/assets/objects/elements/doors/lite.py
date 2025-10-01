@@ -40,7 +40,8 @@ class LiteDoorFactory(PanelDoorFactory):
             else:
                 self.x_subdivisions = 1
                 self.y_subdivisions = 1
-            self.has_glass = True
+            # self.has_glass = True
+            self.has_glass = False
 
     def make_panels(self):
         x_range = (

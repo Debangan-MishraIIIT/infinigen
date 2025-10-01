@@ -654,20 +654,24 @@ class BaseDoorFactory(AssetFactory):
             self.height = constants.door_size
             self.constants = constants
             self.depth = constants.wall_thickness * log_uniform(0.25, 0.5)
-            self.panel_margin = log_uniform(0.02, 0.06) #log_uniform(0.08, 0.12)
+            self.panel_margin = log_uniform(0.08, 0.12) #log_uniform(0.02, 0.06)
             self.bevel_width = uniform(0.005, 0.01)
             self.out_bevel = uniform() < 0.7
             self.shrink_width = log_uniform(0.005, 0.06)
 
-            self.surface = weighted_sample(material_assignments.hard_materials)()
-            self.has_glass = uniform(0, 1.0) < 0.5
+            # self.surface = weighted_sample(material_assignments.hard_materials)()
+            self.surface = weighted_sample(material_assignments.door_no_metal_hard_materials)()
+            # self.has_glass = uniform(0, 1.0) < 0.5
+            self.has_glass = False
             self.glass_surface = weighted_sample(material_assignments.glasses)()
             self.louver_surface = weighted_sample(material_assignments.hard_materials)()
             self.handle_surface = weighted_sample(material_assignments.metal_neutral)()
-            self.has_louver = True
+            # self.has_louver = True
+            self.has_louver = False
 
             self.handle_type = np.random.choice(
-                ["knob", "lever", "pull", "bar", "none"]
+                # ["knob", "lever", "pull", "bar", "none"]
+                ["knob", "lever", "bar"]
             )
 
             # self.door_frame_style = np.random.choice(
@@ -692,7 +696,8 @@ class BaseDoorFactory(AssetFactory):
                 ["left", "right"]
             )  # handle on left/right for push
 
-            self.handle_offset = self.panel_margin * 0.5
+            # self.handle_offset = self.panel_margin * 0.5
+            self.handle_offset = self.panel_margin * 2.5
             self.handle_height = self.height * uniform(0.45, 0.5)
 
             self.door_arc_surface = np.random.choice(["door", "glass"])
@@ -768,7 +773,8 @@ class BaseDoorFactory(AssetFactory):
             self.auto_bevel.amount = 0.001
             self.side_bevel = log_uniform(0.005, 0.015)
 
-            self.metal_color_hsv = colors.metal_hsv()
+            # self.metal_color_hsv = colors.metal_hsv()
+            self.metal_color_hsv = colors.metal_hsv_custom()
 
     def create_asset(self, apply=True, **params) -> bpy.types.Object:
         for _ in range(100):

@@ -157,6 +157,9 @@ def hide_other_rooms(state, rooms_split, keep_rooms: list[str]):
         if "skirtingboard" in o.name:
             o.hide_viewport = True
             o.hide_render = True
+        # if "CeilingLight" in o.name:
+        #     o.hide_viewport = True
+        #     o.hide_render = True
     
     for col in rooms_split.values():
         for o in col.objects:

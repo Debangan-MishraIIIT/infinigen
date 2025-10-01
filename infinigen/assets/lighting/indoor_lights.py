@@ -28,7 +28,9 @@ class PointLampFactory(AssetFactory):
         with FixedSeed(factory_seed):
             self.params = {
                 # "Wattage": U(40, 100),
-                "Wattage": U(200, 300),
+                "Wattage": U(60, 120),
+
+                # "Wattage": U(10, 25),
                 "Radius": U(0.02, 0.03),
                 "Temperature": clip_gaussian(4700, 700, 3500, 6500),
             }
@@ -41,6 +43,7 @@ class PointLampFactory(AssetFactory):
 
     def create_asset(self, **_) -> bpy.types.Object:
         bpy.ops.object.light_add(type="POINT")
+        # bpy.ops.object.light_add(type="AREA")
         lamp = bpy.context.active_object
         lamp.data.energy = self.params["Wattage"]
         lamp.data.shadow_soft_size = self.params["Radius"]

@@ -25,7 +25,8 @@ def random_door_factory():
         LiteDoorFactory,
     ]
     # door_probs = np.array([4, 2, 3, 3])
-    door_probs = np.array([4, 2, 0, 3])
+    # door_probs = np.array([4, 2, 0, 3])
+    door_probs = np.array([4, 0, 0, 3])
     return np.random.choice(door_factories, p=door_probs / door_probs.sum())
 
 
