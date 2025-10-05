@@ -48,7 +48,8 @@ def shader_shelves_blue(nw: NodeWrangler, **kwargs):
        Nodes.PrincipledBSDF,
        input_kwargs={
            "Base Color": base_color,
-           "Roughness": kwargs.get("roughness", 0.9),
+        #    "Roughness": kwargs.get("roughness", 0.9),
+           "Roughness": kwargs.get("roughness", uniform(0.7, 1.0)),
        },
    )
    material_output = nw.new_node(
@@ -65,7 +66,8 @@ def shader_shelves_green(nw: NodeWrangler, **kwargs):
        Nodes.PrincipledBSDF,
        input_kwargs={
            "Base Color": base_color,
-           "Roughness": kwargs.get("roughness", 0.9),
+        #    "Roughness": kwargs.get("roughness", 0.9),
+           "Roughness": kwargs.get("roughness", uniform(0.7, 1.0)),
        },
    )
    material_output = nw.new_node(
@@ -82,7 +84,8 @@ def shader_shelves_red(nw: NodeWrangler, **kwargs):
        Nodes.PrincipledBSDF,
        input_kwargs={
            "Base Color": base_color,
-           "Roughness": kwargs.get("roughness", 0.9),
+        #    "Roughness": kwargs.get("roughness", 0.9),
+           "Roughness": kwargs.get("roughness", uniform(0.7, 1.0)),
        },
    )
    material_output = nw.new_node(
@@ -99,7 +102,8 @@ def shader_shelves_yellow(nw: NodeWrangler, **kwargs):
        Nodes.PrincipledBSDF,
        input_kwargs={
            "Base Color": base_color,
-           "Roughness": kwargs.get("roughness", 0.9),
+        #    "Roughness": kwargs.get("roughness", 0.9),
+           "Roughness": kwargs.get("roughness", uniform(0.7, 1.0)),
        },
    )
    material_output = nw.new_node(
@@ -546,6 +550,24 @@ def get_shelf_material(name, **kwargs):
             shader_func = np.random.choice(
                 [shader_shelves_wood, shader_wood], p=[0.6, 0.4]
             )
+        # ############################################################
+        # case "blue":
+        #     shader_func = np.random.choice(
+        #         [shader_shelves_blue, shader_wood], p=[1.0, 0.0]
+        #     )
+        # case "green":
+        #     shader_func = np.random.choice(
+        #         [shader_shelves_green, shader_wood], p=[1.0, 0.0]
+        #     )
+        # case "red":
+        #     shader_func = np.random.choice(
+        #         [shader_shelves_red, shader_wood], p=[1.0, 0.0]
+        #     )
+        # case "yellow":
+        #     shader_func = np.random.choice(
+        #         [shader_shelves_yellow, shader_wood], p=[1.0, 0.0]
+        #     )
+        # ############################################################
 
         case "glass":
             shader_func = shader_glass
