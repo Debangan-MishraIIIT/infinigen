@@ -97,8 +97,9 @@ door_no_metal_hard_materials = [
     (wood.WhitePlywood, 2.0),
     (wood.BlackPlywood, 2.0),
     (wood.BlondePlywood, 2.0),
-    (plastic.Plastic, 1.0),
-    (plastic.PlasticRough, 1.0),
+    # (plastic.Plastic, 1.0),
+    # (plastic.PlasticRough, 1.0),
+    (plastic.PlasticRough, 2.0),
     # (plastic.PlasticTranslucent, 1.0),
 ]
 
