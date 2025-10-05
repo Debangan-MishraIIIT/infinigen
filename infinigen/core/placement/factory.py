@@ -9,7 +9,9 @@
 
 import logging
 import typing
+import json
 
+import os
 import bpy
 import numpy as np
 from tqdm import trange
@@ -143,6 +145,30 @@ class AssetFactory:
             params = self.asset_parameters(distance, vis_distance)
             params.update(kwargs)
             obj = self.create_asset(i=i, placeholder=placeholder, **params)
+
+
+            ############################################################
+            # try:
+            #     scene_folder = os.environ.get('INFINIGEN_OUTPUT_DIR')
+            #     # Create asset info dict with all parameters except asset_name
+            #     asset_info = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+            #     asset_info.update(params)
+            #     asset_info['asset_type'] = self.__class__.__name__  # Add the factory class name
+
+            #     # Create the main structure with asset_name as key
+            #     asset_dict = {
+            #         f"{repr(self)}.spawn_asset({i})": asset_info
+            #     }
+
+            #     json_path = os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")
+            #     with open(json_path, "a") as f:
+            #         json.dump(asset_dict, f, default=str, indent=2)
+            #         f.write("\n")
+            # except Exception as e:
+            #     print(f"Failed to dump asset parameters: {e}")
+            ############################################################
+
+
             # TODO: clean this up
             if "export" in params and params["export"]:
                 obj, export_path, semantic_mapping = obj
