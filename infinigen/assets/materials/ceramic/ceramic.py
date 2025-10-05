@@ -20,6 +20,11 @@ def shader_ceramic(
     else:
         color = hsv2rgba(0, 0, log_uniform(0.3, 0.6))
 
+    ############################################################
+    roughness_min = uniform(0.5, 0.7)
+    roughness_max = uniform(0.8, 1.0)
+    ############################################################
+
     roughness = nw.build_float_curve(
         nw.musgrave(log_uniform(20, 40)), [(0, roughness_min), (1, roughness_max)]
     )

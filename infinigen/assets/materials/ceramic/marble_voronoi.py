@@ -69,7 +69,8 @@ def shader_marble_voronoi(nw: NodeWrangler):
         input_kwargs={
             "Base Color": colorramp.outputs["Color"],
             "Metallic": 0.5000,
-            "Roughness": 0.0000,
+            # "Roughness": 0.0000,
+            "Roughness": uniform(0.7, 1.0),
         },
     )
 

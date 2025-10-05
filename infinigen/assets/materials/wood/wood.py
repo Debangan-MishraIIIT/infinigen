@@ -171,7 +171,8 @@ def shader_wood(nw: NodeWrangler, color=None, w=None, vertical=False, **kwargs):
     )
 
     color = mix_3.outputs[2]
-    roughness = uniform(0.0, 0.4)
+    # roughness = uniform(0.0, 0.4)
+    roughness = uniform(0.5, 0.7)
     roughness = nw.build_float_curve(
         nw.new_node(Nodes.NoiseTexture, input_kwargs={"Scale": log_uniform(40, 50)}),
         [(0, roughness), (1, roughness + uniform(0.0, 0.8))],
@@ -182,6 +183,7 @@ def shader_wood(nw: NodeWrangler, color=None, w=None, vertical=False, **kwargs):
             "Base Color": color,
             "Roughness": roughness,
             "Coat Weight": np.clip(uniform(0, 1.4), 0, 1),
+            "Coat Roughness": uniform(0.7, 1.0),
         },
     )
     nw.new_node(

@@ -8,6 +8,8 @@ from infinigen.assets.materials.utils import common
 from infinigen.core import surface
 from infinigen.core.nodes.node_wrangler import Nodes, NodeWrangler
 
+from numpy.random import normal, uniform
+
 
 def shader_marble(nw: NodeWrangler, **kwargs):
     # Code generated using version 2.6.4 of the node_transpiler
@@ -141,7 +143,8 @@ def shader_marble(nw: NodeWrangler, **kwargs):
         input_kwargs={
             "Base Color": mix_1.outputs[2],
             "Specular IOR Level": 0.6000,
-            "Roughness": 0.1000,
+            # "Roughness": 0.1000,
+            "Roughness": uniform(0.7, 1.0),
         },
     )
 

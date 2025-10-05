@@ -131,10 +131,14 @@ def shader_bone(nw: NodeWrangler):
 
     principled_bsdf = nw.new_node(
         Nodes.PrincipledBSDF,
-        input_kwargs={"Base Color": mix, "Roughness": 0.44090000000000001},
+        # input_kwargs={"Base Color": mix, "Roughness": 0.44090000000000001},
+        input_kwargs={"Base Color": mix, "Roughness": uniform(0.7, 1.0)},
     )
 
-    glass_bsdf = nw.new_node("ShaderNodeBsdfGlass")
+    glass_bsdf = nw.new_node(
+        "ShaderNodeBsdfGlass", 
+        input_kwargs={"Roughness": uniform(0.7, 1.0)} ########################################
+    )
 
     mix_shader = nw.new_node(
         Nodes.MixShader, input_kwargs={"Fac": 0.2, 1: principled_bsdf, 2: glass_bsdf}

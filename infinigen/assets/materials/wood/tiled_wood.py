@@ -254,8 +254,11 @@ def nodegroup_tiled_wood(nw: NodeWrangler):
     )
 
     color = mix_4.outputs[2]
+    # roughness = nw.build_float_curve(
+    #     color, [(0, uniform(0.3, 0.5)), (1, uniform(0.8, 1.0))]
+    # )
     roughness = nw.build_float_curve(
-        color, [(0, uniform(0.3, 0.5)), (1, uniform(0.8, 1.0))]
+        color, [(0, uniform(0.5, 0.7)), (1, uniform(0.8, 1.0))]
     )
     principled_bsdf = nw.new_node(
         Nodes.PrincipledBSDF, input_kwargs={"Base Color": color, "Roughness": roughness}
