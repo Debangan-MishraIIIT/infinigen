@@ -841,6 +841,14 @@ def home_furniture_constraints():
             * lamps.related_to(desks.related_to(r, cu.on), cu.ontop)
             .count()
             .in_range(0, 1)
+            * (  # lamps should not be front-to-front with monitors
+                lamps.related_to(desks.related_to(r, cu.on), cu.ontop).all(
+                    lambda l: l.related_to(
+                        desk_monitors.related_to(desks.related_to(r, cu.on)),
+                        cu.front_to_front
+                    ).count().equals(0)
+                )
+            )
             * (  # pull-string lamps look extremely unnatural when too far off the ground
                 lamps.related_to(storage.related_to(r)).all(
                     lambda l: l.distance(r, cu.floortags).in_range(0.5, 1.5)
