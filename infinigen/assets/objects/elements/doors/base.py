@@ -697,7 +697,7 @@ class BaseDoorFactory(AssetFactory):
             )  # handle on left/right for push
 
             # self.handle_offset = self.panel_margin * 0.5
-            self.handle_offset = self.panel_margin * 2.5
+            self.handle_offset = self.panel_margin * 1.0
             self.handle_height = self.height * uniform(0.45, 0.5)
 
             self.door_arc_surface = np.random.choice(["door", "glass"])
@@ -1000,6 +1000,26 @@ class BaseDoorFactory(AssetFactory):
 
         if apply:
             butil.apply_modifiers(door_joined, geometry_node_join.__name__)
+
+
+        # Add light blocker
+        ############################################################
+        bpy.ops.mesh.primitive_cube_add(
+            size=2,
+            enter_editmode=False,
+            align='WORLD',
+            location=(0, 0, 0),
+            scale=(1, 1, 1)
+        )
+        plane = bpy.context.active_object
+        plane.name = "door_light_blocking_plane"
+        plane.scale = (self.width/2 + 0.1 , self.depth/6, self.height/2 + 0.1)
+        plane.location = (-self.width/2, 0, self.height/2 + 0.1)
+        butil.apply_transform(plane)
+        ############################################################
+
+        # Parent plane to door
+        plane.parent = door_joined
 
         return door_joined
 
