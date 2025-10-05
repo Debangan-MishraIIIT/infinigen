@@ -3,7 +3,8 @@
 
 # Authors: Alexander Raistrick, Stamatis Alexandropolous, Yiming Zuo
 
-
+import os
+import json
 import bpy
 import numpy as np
 from numpy.random import uniform
@@ -1415,7 +1416,8 @@ def sofa_parameter_distribution(dimensions=None):
         "arm_width": uniform(0.6, 0.9),
         "Arm_height": uniform(0.7, 1.0),
         "arms_angle": uniform(0.0, 1.08),
-        "Footrest": True if uniform() > 0.5 and dimensions[1] > 2 else False,
+        # "Footrest": True if uniform() > 0.5 and dimensions[1] > 2 else False,
+        "Footrest": False,
         "Count": 1 if uniform() > 0.2 else 4,
         "Scaling footrest": uniform(1.3, 1.6),
         "Reflection": 1 if uniform() > 0.5 else -1,
@@ -1461,6 +1463,18 @@ class SofaFactory(AssetFactory):
 
         with butil.SelectObjects(hipoly):
             bpy.ops.object.shade_smooth()
+
+        ############################################################
+        scene_folder = os.environ.get('INFINIGEN_OUTPUT_DIR')
+        if os.path.exists(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")):
+            asset_dict = json.load(open(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")))
+        else:
+            asset_dict = {}
+        asset_dict[f"{repr(self)}.spawn_asset({i})"] = self.params
+        json_path = os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")
+        with open(json_path, "w") as f:
+            json.dump(asset_dict, f, default=str, indent=2)
+        ############################################################
 
         return hipoly
 
