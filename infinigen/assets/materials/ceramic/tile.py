@@ -510,7 +510,7 @@ def shader_composite_tile(
 def get_shader_funcs():
     return [
         (bone.shader_bone, 1),
-        (cobble_stone.shader_cobblestone, 1),
+        # (cobble_stone.shader_cobblestone, 1),###############################
         (ceramic.shader_ceramic, 4),
         (dirt.shader_dirt, 1),
         (stone.shader_stone, 1),
@@ -540,8 +540,10 @@ class Tile:
             scale = log_uniform(1.0, 2.0)
 
         if shader_func == ceramic.shader_ceramic:
-            low = uniform(0.1, 0.3)
-            high = uniform(0.6, 0.8)
+            # low = uniform(0.1, 0.3)
+            # high = uniform(0.6, 0.8)
+            low = uniform(0.6, 0.75)
+            high = uniform(0.75, 1.0)
             shader_func = partial(
                 ceramic.shader_ceramic, roughness_min=low, roughness_max=high
             )
