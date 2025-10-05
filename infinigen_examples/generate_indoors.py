@@ -5,6 +5,7 @@
 import argparse
 import logging
 from pathlib import Path
+import os
 
 # ruff: noqa: E402
 # NOTE: logging config has to be before imports that use logging
@@ -136,6 +137,10 @@ all_vars = [cu.variable_room, cu.variable_obj]
 
 @gin.configurable
 def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
+    #########################################################
+    os.environ['INFINIGEN_OUTPUT_DIR'] = str(output_folder)
+    #########################################################
+
     p = pipeline.RandomStageExecutor(scene_seed, output_folder, overrides)
 
     logger.debug(overrides)
