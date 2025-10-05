@@ -3,6 +3,8 @@
 
 # Authors: Beining Han
 
+import os
+import json
 import bpy
 import numpy as np
 from numpy.random import normal, uniform
@@ -849,6 +851,18 @@ class SimpleBookcaseBaseFactory(AssetFactory):
             obj, geometry_nodes, apply=True, attributes=[], input_kwargs=obj_params
         )
         tagging.tag_system.relabel_obj(obj)
+
+        ############################################################
+        scene_folder = os.environ.get('INFINIGEN_OUTPUT_DIR')
+        if os.path.exists(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")):
+            asset_dict = json.load(open(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")))
+        else:
+            asset_dict = {}
+        asset_dict[f"{repr(self)}.spawn_asset({i})"] = obj_params
+        json_path = os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")
+        with open(json_path, "w") as f:
+            json.dump(asset_dict, f, default=str, indent=2)
+        ############################################################
 
         return obj
 
