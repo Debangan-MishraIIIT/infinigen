@@ -28,7 +28,8 @@ class BowlFactory(TablewareFactory):
             self.x_mid = uniform(0.8, 0.95) * self.x_end
             self.has_guard = False
             self.has_inside = uniform(0, 1) < 0.5
-            self.scale = log_uniform(0.15, 0.4)
+            # self.scale = log_uniform(0.15, 0.4)
+            self.scale = log_uniform(0.15, 0.35)
             self.thickness = uniform(0.01, 0.03) * self.scale
         self.edge_wear = None
 

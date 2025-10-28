@@ -7,7 +7,8 @@
 # - Yiming Zuo: updates for sim integration
 # - Abhishek Joshi: updates for sim integration
 
-
+import os
+import json
 import bpy
 import numpy as np
 from numpy.random import uniform
@@ -1016,10 +1017,71 @@ class BaseDoorFactory(AssetFactory):
         plane.scale = (self.width/2 + 0.1 , self.depth/6, self.height/2 + 0.1)
         plane.location = (-self.width/2, 0, self.height/2 + 0.1)
         butil.apply_transform(plane)
+        self.surface.apply(plane)
         ############################################################
 
         # Parent plane to door
         plane.parent = door_joined
+
+
+        ############################################################
+        scene_folder = os.environ.get('INFINIGEN_OUTPUT_DIR')
+        if os.path.exists(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")):
+            asset_dict = json.load(open(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")))
+        else:
+            asset_dict = {}
+        placeholder_name = params['placeholder'].name
+        placeholder_name = placeholder_name.replace('placeholder', 'asset')
+        asset_dict[placeholder_name] = {
+            "width": self.width,
+            "height": self.height,
+            "depth": self.depth,
+            "panel_margin": self.panel_margin,
+            "bevel_width": self.bevel_width,
+            "out_bevel": self.out_bevel,
+            "shrink_width": self.shrink_width,
+            "surface": self.surface,
+            "has_glass": self.has_glass,
+            "glass_surface": self.glass_surface,
+            "louver_surface": self.louver_surface,
+            "handle_surface": self.handle_surface,
+            "handle_type": self.handle_type,
+            "door_frame_style": self.door_frame_style,
+            "door_frame_width": self.door_frame_width,
+            "door_orientation": self.door_orientation,
+            "handle_offset": self.handle_offset,
+            "handle_height": self.handle_height,
+            "door_arc_surface": self.door_arc_surface,
+            "handle_joint": self.handle_joint,
+            "handle_info_dict": self.handle_info_dict,
+            "knob_radius": self.knob_radius,
+            "knob_radius_mid": self.knob_radius_mid,
+            "knob_depth": self.knob_depth,
+            "knob_depth_mid": self.knob_depth_mid,
+            "lever_radius": self.lever_radius,
+            "lever_mid_radius": self.lever_mid_radius,
+            "lever_depth": self.lever_depth,
+            "lever_mid_depth": self.lever_mid_depth,
+            "lever_length": self.lever_length,
+            "level_type": self.level_type,
+            "pull_size": self.pull_size,
+            "pull_width": self.pull_width,
+            "pull_depth": self.pull_depth,
+            "pull_extension": self.pull_extension,
+            "to_pull_bevel": self.to_pull_bevel,
+            "pull_bevel_width": self.pull_bevel_width,
+            "pull_radius": self.pull_radius,
+            "pull_type": self.pull_type,
+            "is_pull_circular": self.is_pull_circular,
+            "panel_surface": self.panel_surface,
+            "auto_bevel": self.auto_bevel,
+            "side_bevel": self.side_bevel,
+            "metal_color_hsv": self.metal_color_hsv,
+        }
+        json_path = os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")
+        with open(json_path, "w") as f:
+            json.dump(asset_dict, f, default=str, indent=2)
+        ############################################################
 
         return door_joined
 

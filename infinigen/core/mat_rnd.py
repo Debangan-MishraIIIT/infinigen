@@ -36,6 +36,9 @@ def apply_custom_stages(blend_file):
     fix_door_orientation()
     print("Door orientation fix completed")
 
+    cleanup_asset_parameters()
+    print("Asset parameters cleanup completed")
+
     # Save the blend file with different name
     save_path = blend_file.parent / f"{blend_file.stem}.blend"
     bpy.ops.wm.save_as_mainfile(filepath=str(save_path))
@@ -55,6 +58,32 @@ def asset_info_json(blend_file):
             print(f"Processing object: {obj.name}")
             print(f"Object type: {obj.type}")
             print(obj)
+
+
+def cleanup_asset_parameters():
+    scene_folder = os.environ.get('INFINIGEN_OUTPUT_DIR')
+    if os.path.exists(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")):
+        asset_dict = json.load(open(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")))
+    else:
+        asset_dict = {}
+    to_remove = []
+    to_keep = []
+    for obj in bpy.data.objects:
+        if "spawn_asset" in obj.name:
+            if not obj.hide_render:
+                to_keep.append(obj.name)
+    for key in asset_dict.keys():
+        if key not in to_keep:
+            to_remove.append(key)
+    for key in to_remove:
+        del asset_dict[key]
+    json_path = os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")
+    with open(json_path, "w") as f:
+        json.dump(asset_dict, f, default=str, indent=2)
+
+    print(f"Removed {len(to_remove)} asset parameters")
+    print(f"Kept {len(to_keep)} asset parameters")
+    print(f"Total asset parameters: {len(asset_dict.keys())}")
 
 
 def fix_window_orientation():

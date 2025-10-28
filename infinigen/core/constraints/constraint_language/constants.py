@@ -81,7 +81,7 @@ class RoomConstants:
     def window_params(
         self,
         # max_window_length=("uniform", 6, 8),
-        max_window_length=("uniform", 4, 6),
+        max_window_length=("uniform", 4, 5),
         window_height=("uniform", 0.8, 1.2),
         window_margin=("uniform", 0.2, 0.25),
         window_size=("uniform", 1.0, 1.5),

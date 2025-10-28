@@ -2,6 +2,8 @@
 # This source code is licensed under the BSD 3-Clause license found in the LICENSE file in the root directory of this source tree.
 
 # Authors: Lingjie Mei
+import os
+import json
 import bpy
 import numpy as np
 from numpy.random import uniform
@@ -49,7 +51,7 @@ class PlantContainerFactory(AssetFactory):
         CactusFactory,
         MushroomFactory,
         FernFactory,
-        SucculentFactory,
+        # SucculentFactory,
         SpiderPlantFactory,
         SnakePlantFactory,
     ]
@@ -60,6 +62,7 @@ class PlantContainerFactory(AssetFactory):
             self.base_factory = PlantPotFactory(self.factory_seed, coarse)
 
             fn = np.random.choice(self.plant_factories)
+            self.plant_factory_name = fn.__name__
 
             self.dirt_ratio = uniform(0.7, 0.8)
             self.plant_factory = fn(self.factory_seed)
@@ -122,6 +125,26 @@ class PlantContainerFactory(AssetFactory):
         plant.location[-1] = dirt_z
 
         obj = join_objects([obj, plant, dirt_])
+
+        ############################################################
+        scene_folder = os.environ.get('INFINIGEN_OUTPUT_DIR')
+        if os.path.exists(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")):
+            asset_dict = json.load(open(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")))
+        else:
+            asset_dict = {}
+        asset_dict[f"{repr(self)}.spawn_asset({i})"] = {
+            "side_size": self.side_size,
+            "top_size": self.top_size,
+            "dirt_ratio": self.dirt_ratio,
+            "pot_material": self.base_factory.surface,
+            "pot_depth": self.base_factory.depth,
+            "plant_factory_name": self.plant_factory_name,
+            "plant_factory": self.base_factory
+        }
+        json_path = os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")
+        with open(json_path, "w") as f:
+            json.dump(asset_dict, f, default=str, indent=2)
+        ############################################################
         return obj
 
 

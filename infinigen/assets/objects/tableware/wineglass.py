@@ -3,6 +3,8 @@
 
 # Authors: Lingjie Mei
 import bpy
+import os
+import json
 import numpy as np
 from numpy.random import uniform
 
@@ -28,7 +30,8 @@ class WineglassFactory(TablewareFactory):
             self.has_guard = False
             self.thickness = uniform(0.01, 0.03)
             self.surface = weighted_sample(material_assignments.glasses)()()
-            self.scale = log_uniform(0.1, 0.3)
+            # self.scale = log_uniform(0.1, 0.3)
+            self.scale = log_uniform(0.1, 0.17)
 
     def create_asset(self, **params) -> bpy.types.Object:
         z_bottom = self.z_length * log_uniform(0.01, 0.05)
@@ -49,5 +52,33 @@ class WineglassFactory(TablewareFactory):
 
         with butil.SelectObjects(obj):
             bpy.ops.object.shade_smooth()
+
+        ############################################################
+        scene_folder = os.environ.get('INFINIGEN_OUTPUT_DIR')
+        if os.path.exists(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")):
+            asset_dict = json.load(open(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")))
+        else:
+            asset_dict = {}
+        placeholder_name = params['placeholder'].name
+        placeholder_name = placeholder_name.split('.')
+        placeholder_name = placeholder_name[:-1]
+        placeholder_name = '.'.join(placeholder_name)
+        placeholder_name = placeholder_name.replace('placeholder', 'asset')
+        asset_dict[placeholder_name] = {
+            "z_length": self.z_length,
+            "z_cup": self.z_cup,
+            "z_mid": self.z_mid,
+            "x_end": self.x_end,
+            "x_neck": self.x_neck,
+            "x_top": self.x_top,
+            "x_mid": self.x_mid,
+            "thickness": self.thickness,
+            "scale": self.scale,
+            "surface": self.surface,
+        }
+        json_path = os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")
+        with open(json_path, "w") as f:
+            json.dump(asset_dict, f, default=str, indent=2)
+        ############################################################
 
         return obj

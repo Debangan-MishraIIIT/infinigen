@@ -6,6 +6,8 @@
 # - Alexander Raistrick: update window glass
 
 import bpy
+import os
+import json
 import numpy as np
 from numpy.random import randint as RI
 from numpy.random import uniform
@@ -286,6 +288,21 @@ class WindowFactory(AssetFactory):
         portal.rotation_euler = (-np.pi / 2, 0, 0)
         butil.parent_to(portal, obj, no_inverse=True)
         portal.hide_viewport = True
+
+        ############################################################
+        import builtins
+        scene_folder = os.environ.get('INFINIGEN_OUTPUT_DIR')
+        if os.path.exists(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")):
+            asset_dict = json.load(builtins.open(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")))
+        else:
+            asset_dict = {}
+        placeholder_name = params['placeholder'].name
+        placeholder_name = placeholder_name.replace('placeholder', 'asset')
+        asset_dict[placeholder_name] = self.params
+        json_path = os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")
+        with builtins.open(json_path, "w") as f:
+            json.dump(asset_dict, f, default=str, indent=2)
+        ############################################################
 
         return obj
 
