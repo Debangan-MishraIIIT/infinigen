@@ -1437,7 +1437,7 @@ class SofaFactory(AssetFactory):
             # self.clothes_scatter = ClothesCover(factory_fn=blanket.BlanketFactory, width=log_uniform(1, 1.5),
             #                                    size=uniform(.8, 1.2)) if uniform() < .3 else NoApply()
 
-            sofa_fabric_gen_class = weighted_sample(material_assignments.fabrics)
+            sofa_fabric_gen_class = weighted_sample(material_assignments.sofa_fabrics)
             self.sofa_fabric = sofa_fabric_gen_class()()
 
     def create_placeholder(self, **_):

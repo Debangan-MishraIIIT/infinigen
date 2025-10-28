@@ -64,6 +64,15 @@ fabrics = [
     (fabric.SofaFabric, 1.0),
 ]
 
+sofa_fabrics = [
+    # (fabric.CoarseKnitFabric, 1.0),
+    (fabric.FineKnitFabric, 1.0),
+    # (fabric.PlaidFabric, 1.0),
+    (fabric.Leather, 1.0),
+    # (fabric.SofaFabric, 1.0),
+]
+
+
 plastics = [
     (plastic.Plastic, 1.0),
     (plastic.PlasticRough, 1.0),
@@ -175,7 +184,8 @@ table_top = [
     (ceramic.Marble, 1.0),
     (wood.TiledWood, 1.0),
     (plastic.PlasticRough, 1.0),
-    (ceramic.GlassVolume, 1.0),
+    # (ceramic.GlassVolume, 1.0),
+    (ceramic.GlassVolume, 0.0),
 ]
 
 decorative_metal = [

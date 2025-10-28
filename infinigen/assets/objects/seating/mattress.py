@@ -84,7 +84,7 @@ class MattressFactory(AssetFactory):
             # self.surface = fabric.fabric_random
             self.type = rg(self.types)
 
-            surface_gen_class = weighted_sample(material_assignments.fabrics)
+            surface_gen_class = weighted_sample(material_assignments.sofa_fabrics)
             self.surface_material_gen = surface_gen_class()
             self.surface = self.surface_material_gen()
 
