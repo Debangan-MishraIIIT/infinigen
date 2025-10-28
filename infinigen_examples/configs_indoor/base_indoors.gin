@@ -2,14 +2,14 @@ include 'infinigen_examples/configs_nature/base.gin'
 include 'infinigen_examples/configs_nature/performance/fast_terrain_assets.gin'
 
 # overriden in fast_solve.gin if present
-compose_indoors.solve_steps_large = 300
-compose_indoors.solve_steps_medium = 200
-compose_indoors.solve_steps_small = 50
+compose_indoors.solve_steps_large = 600 #3000 #300
+compose_indoors.solve_steps_medium = 200 #2000 #200
+compose_indoors.solve_steps_small = 50 #100 #500 #50
 
-SimulatedAnnealingSolver.initial_temp = 3
+SimulatedAnnealingSolver.initial_temp = 6 #3
 SimulatedAnnealingSolver.final_temp = 0.001
 SimulatedAnnealingSolver.finetune_pct = 0.15
-SimulatedAnnealingSolver.max_invalid_candidates = 5
+SimulatedAnnealingSolver.max_invalid_candidates = 20 #5
 
 RoomConstants.n_stories = 1
 
@@ -48,7 +48,7 @@ nishita_lighting.sun_elevation = ("clip_gaussian", 40, 25, 6, 70)
 compose_indoors.lights_off_chance=0.0 #0.2
 compose_indoors.skirting_floor_chance=0.7
 compose_indoors.skirting_ceiling_chance=0.4
-compose_indoors.room_pillars_chance = 0.0 #0.1
+compose_indoors.room_pillars_chance=0.0 #0.1
 
 compose_indoors.near_distance = 60
 

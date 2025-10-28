@@ -17,7 +17,7 @@ conda activate infinigen
 
 
 python -m infinigen.datagen.manage_jobs \
-    --output_folder outputs/LivingRoom_v201_testing_55_full \
+    --output_folder outputs/LivingRoom_v201_testing_61_lr_check_lamp \
     --num_scenes 400 \
     --configs singleroom.gin studio.gin \
     --pipeline_overrides \
@@ -33,4 +33,4 @@ python -m infinigen.datagen.manage_jobs \
         local_256GB_custom.gin \
         monocular.gin \
         indoor_background_configs.gin \
-        # opengl_gt.gin
+        opengl_gt.gin

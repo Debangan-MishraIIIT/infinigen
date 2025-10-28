@@ -85,7 +85,8 @@ def unified_asset_import(name):
         "scatter": "tests/assets/list_scatters.txt",
         "material": "tests/assets/list_materials.txt",
         "material_deprec": "tests/assets/list_materials_deprecated_interface.txt",
-        "object": "tests/assets/list_nature_meshes.txt",
+        # "object": "tests/assets/list_nature_meshes.txt",
+        "object": "tests/assets/list_indoor_meshes.txt",
     }
 
     # Create single list with (asset_path, asset_type) tuples

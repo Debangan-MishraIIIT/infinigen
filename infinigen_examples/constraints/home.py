@@ -36,8 +36,9 @@ def sample_home_constraint_params():
     return dict(
         # what pct of the room floorplan should we try to fill with furniture?
         furniture_fullness_pct=uniform(0.6, 0.9),
+        # furniture_fullness_pct=uniform(0.6, 1),
         # how many objects in each shelving per unit of volume
-        obj_interior_obj_pct=uniform(0.5, 1),  # uniform(0.6, 0.9),
+        obj_interior_obj_pct=uniform(0.7, 0.9), #uniform(0.5, 1),  # uniform(0.6, 0.9),
         # what pct of top surface of storage furniture should be filled with objects? e.g pct of top surface of shelf
         obj_on_storage_pct=uniform(0.5, 1.0),
         # what pct of top surface of NON-STORAGE objects should be filled with objects? e.g pct of countertop/diningtable covered in stuff
@@ -45,12 +46,16 @@ def sample_home_constraint_params():
         # meters squared of wall art per approx meters squared of FLOOR area. TODO cant measure wall area currently.
         painting_area_per_room_area=uniform(40, 100) / 40,
         # rare objects wont even be added to the constraint graph in most homes
-        has_tv=uniform() < 0.5,
-        has_aquarium_tank=uniform() < 0.15,
+        # has_tv=uniform() < 0.5,
+        has_tv=uniform() < 0.75,
+        # has_aquarium_tank=uniform() < 0.15,
+        has_aquarium_tank=uniform() < 0.5,
         # has_birthday_balloons=uniform() < 0.15,
         has_birthday_balloons=False,
-        has_cocktail_tables=uniform() < 0.15,
-        has_kitchen_barstools=uniform() < 0.15,
+        # has_cocktail_tables=uniform() < 0.15,
+        has_cocktail_tables=uniform() < 0.5,
+        # has_kitchen_barstools=uniform() < 0.15,
+        has_kitchen_barstools=uniform() < 0.5,
     )
 
 
@@ -552,10 +557,28 @@ def home_furniture_constraints():
     furniture = obj[Semantics.Furniture].related_to(rooms, cu.on_floor)
     wallfurn = furniture.related_to(rooms, cu.against_wall)
 
-    storage = furniture[Semantics.Storage]
-    storage_freestanding = storage.related_to(rooms, cu.against_wall)
-
     params = sample_home_constraint_params()
+
+    # storage = furniture[Semantics.Storage]
+    # storage_freestanding = storage.related_to(rooms, cu.against_wall)
+
+    #########################################################
+    storage_open = furniture[Semantics.StorageOpen]
+    storage_closed = furniture[Semantics.StorageClosed]
+    
+    if uniform(0, 1) < 0.5:
+        print("storage_open")
+        params["has_tv"] = 1
+        storage_choice = "open"
+        storage = storage_open
+        storage_freestanding = storage_open.related_to(rooms, cu.against_wall)
+    else:
+        print("storage_closed")
+        params["has_tv"] = 0
+        storage_choice = "closed"
+        storage = storage_closed
+        storage_freestanding = storage_closed.related_to(rooms, cu.against_wall)
+    #########################################################
 
     for k, v in params.items():
         print(f"{home_furniture_constraints.__name__} params - {k}: {v}")
@@ -740,7 +763,8 @@ def home_furniture_constraints():
     )
     constraints["plants"] = rooms.all(
         lambda r: (
-            big_plants.related_to(r).count().in_range(0, 1)
+            # big_plants.related_to(r).count().in_range(0, 1)
+            big_plants.related_to(r).count().in_range(0, 4)
             * small_plants.related_to(storage.related_to(r)).count().in_range(0, 5)
         )
     )
@@ -774,9 +798,10 @@ def home_furniture_constraints():
             desks.related_to(r).all(
                 lambda t: (
                     deskchair.related_to(r).related_to(t).count().in_range(0, 1)
+                    # deskchair.related_to(r).related_to(t).count().equals(1)
                     * desk_monitors.related_to(t, cu.ontop).count().equals(1)
                     * (obj[Semantics.OfficeShelfItem].related_to(t, cu.on).count() >= 0)
-                    * (deskchair.related_to(r).related_to(t).count() == 1)
+                    # * (deskchair.related_to(r).related_to(t).count() == 1)
                 )
             )
         )
@@ -808,6 +833,7 @@ def home_furniture_constraints():
         lambda r: (
             # dont put redundant lights close to eachother (including lamps, ceiling lights, etc)
             cl.min_distance_internal(lights.related_to(r)) >= 1
+            # cl.min_distance_internal(lights.related_to(r)) >= 2
         )
     )
 
@@ -837,25 +863,44 @@ def home_furniture_constraints():
     constraints["lamps"] = rooms.all(
         lambda r: (
             # allow 0-2 lamps per room, placed on any sensible object
-            lamps.related_to(storage.related_to(r)).count().in_range(0, 2)
+            # lamps.related_to(storage.related_to(r)).count().in_range(0, 2)
+            lamps.related_to(storage.related_to(r)).count().equals(0)
             * lamps.related_to(desks.related_to(r, cu.on), cu.ontop)
             .count()
             .in_range(0, 1)
-            * (  # lamps should not be front-to-front with monitors
+            # .in_range(0, 2)
+            # * (  # lamps should not be front-to-front with monitors
+            #     lamps.related_to(desks.related_to(r, cu.on), cu.ontop).all(
+            #         lambda l: l.related_to(
+            #             desk_monitors.related_to(desks.related_to(r, cu.on)),
+            #             cu.front_to_front
+            #         ).count().equals(0)
+            #     )
+            # )
+            * (  # lamps should keep some distance from monitors
                 lamps.related_to(desks.related_to(r, cu.on), cu.ontop).all(
-                    lambda l: l.related_to(
-                        desk_monitors.related_to(desks.related_to(r, cu.on)),
-                        cu.front_to_front
-                    ).count().equals(0)
+                    lambda l: l.distance(desk_monitors.related_to(desks.related_to(r, cu.on))).in_range(0.3, 2.0)
                 )
             )
             * (  # pull-string lamps look extremely unnatural when too far off the ground
                 lamps.related_to(storage.related_to(r)).all(
-                    lambda l: l.distance(r, cu.floortags).in_range(0.5, 1.5)
+                    lambda l: l.distance(r, cu.floortags) > 0.15
                 )
             )
         )
     )
+
+    #########################################################
+    #########################################################
+    score_terms["monitor_accessibility"] = (
+        desk_monitors.mean(
+            lambda t: (
+                cl.accessibility_cost(t, lamps, cu.front_dir, dist=2)
+            )
+        ).minimize(weight=5)
+    )
+    #########################################################
+    #########################################################
 
     # endregion
 
@@ -866,7 +911,8 @@ def home_furniture_constraints():
 
     constraints["sidetable_objects"] = rooms.all(
         lambda r: (
-            lamps.related_to(sidetables.related_to(r)).count().in_range(0, 2)
+            # lamps.related_to(sidetables.related_to(r)).count().in_range(0, 2)
+            lamps.related_to(sidetables.related_to(r)).count().in_range(0, 1)
             * sidetables.all(
                 lambda s: obj[Semantics.OfficeShelfItem].related_to(s, cu.on).count()
                 >= 0
@@ -916,12 +962,18 @@ def home_furniture_constraints():
 
     constraints["bedroom"] = bedrooms.all(
         lambda r: (
-            beds.related_to(r).count().in_range(1, 2)
-            * sidetables.related_to(beds.related_to(r)).count().in_range(0, 2)
+            # beds.related_to(r).count().in_range(1, 2)
+            beds.related_to(r).count().in_range(1, 4)
+            # * sidetables.related_to(beds.related_to(r)).count().in_range(0, 2)
+            * sidetables.related_to(beds.related_to(r)).count().in_range(0, 4)
             * rugs.related_to(r).count().in_range(0, 1)
-            * desks.related_to(r).count().in_range(0, 1)
-            * storage_freestanding.related_to(r).count().in_range(2, 5)
-            * floor_lamps.related_to(r).count().in_range(0, 1)
+            # * desks.related_to(r).count().in_range(0, 1)
+            # * desks.related_to(r).count().in_range(0, 4)
+            * desks.related_to(r).count().in_range(0, 3)
+            # * storage_freestanding.related_to(r).count().in_range(2, 5)
+            * storage_freestanding.related_to(r).count().in_range(0, 5)
+            # * floor_lamps.related_to(r).count().in_range(0, 1)
+            * floor_lamps.related_to(r).count().in_range(0, 4)
             * storage.related_to(r).all(
                 lambda s: (
                     obj[Semantics.OfficeShelfItem].related_to(s, cu.on).count() >= 0
@@ -1041,8 +1093,9 @@ def home_furniture_constraints():
         lambda r: (
             kitchen_appliances_big[appliances.DishwasherFactory]
             .related_to(r)
-            .count()
-            .in_range(0, 1)
+            .count().equals(0)
+            # .count()
+            # .in_range(0, 1)
             * kitchen_appliances_big[appliances.BeverageFridgeFactory]
             .related_to(r)
             .count()
@@ -1270,29 +1323,95 @@ def home_furniture_constraints():
     )
 
     constraints["livingroom"] = livingrooms.all(
-        lambda r: (
-            storage_freestanding.related_to(r).count().in_range(0, 5)
-            * tvstands.related_to(r).count().equals(1)
-            * sidetables.related_to(sofas.related_to(r)).count().in_range(0, 2)
-            * desks.related_to(r).count().in_range(0, 1)
-            * coffeetables.related_to(r).count().in_range(0, 1)
-            * coffeetables.related_to(r).all(
-                lambda t: (
-                    obj[Semantics.OfficeShelfItem]
-                    .related_to(t, cu.on)
+            lambda r: (
+                storage_freestanding.related_to(r).count().in_range(0, 5)
+                * tvstands.related_to(r).count().equals(1)
+                # * sidetables.related_to(sofas.related_to(r)).count().in_range(0, 2)
+                * sidetables.related_to(sofas.related_to(r)).count().in_range(0, 4)
+                # * desks.related_to(r).count().in_range(0, 1)
+                # * desks.related_to(r).count().in_range(0, 4)
+                * desks.related_to(r).count().in_range(0, 3)
+                * coffeetables.related_to(r).count().in_range(0, 1)
+                # * coffeetables.related_to(r).count().in_range(0, 2)
+                * coffeetables.related_to(r).all(
+                    lambda t: (
+                        obj[Semantics.OfficeShelfItem]
+                        .related_to(t, cu.on)
+                        .count()
+                        .in_range(0, 3)
+                    )
+                )
+                * (
+                    rugs.related_to(r)
+                    # .related_to(furniture.related_to(r), cu.side_by_side)
                     .count()
-                    .in_range(0, 3)
+                    .in_range(0, 1)
+                    # .in_range(0, 2)
                 )
             )
-            * (
-                rugs.related_to(r)
-                # .related_to(furniture.related_to(r), cu.side_by_side)
-                .count()
-                .in_range(0, 1)
-                # .in_range(0, 2)
+    )
+
+
+    ###############################
+    if storage_choice == "open":
+        constraints["livingroom"] = livingrooms.all(
+            lambda r: (
+                storage_freestanding.related_to(r).count().in_range(0, 5)
+                * tvstands.related_to(r).count().equals(1)
+                # * sidetables.related_to(sofas.related_to(r)).count().in_range(0, 2)
+                * sidetables.related_to(sofas.related_to(r)).count().in_range(0, 4)
+                # * desks.related_to(r).count().in_range(0, 1)
+                # * desks.related_to(r).count().in_range(0, 4)
+                * desks.related_to(r).count().in_range(0, 3)
+                * coffeetables.related_to(r).count().in_range(0, 1)
+                # * coffeetables.related_to(r).count().in_range(0, 2)
+                * coffeetables.related_to(r).all(
+                    lambda t: (
+                        obj[Semantics.OfficeShelfItem]
+                        .related_to(t, cu.on)
+                        .count()
+                        .in_range(0, 3)
+                    )
+                )
+                * (
+                    rugs.related_to(r)
+                    # .related_to(furniture.related_to(r), cu.side_by_side)
+                    .count()
+                    .in_range(0, 1)
+                    # .in_range(0, 2)
+                )
             )
         )
-    )
+    else:
+        constraints["livingroom"] = livingrooms.all(
+            lambda r: (
+                storage_freestanding.related_to(r).count().in_range(0, 5)
+                * tvstands.related_to(r).count().equals(0)
+                # * sidetables.related_to(sofas.related_to(r)).count().in_range(0, 2)
+                * sidetables.related_to(sofas.related_to(r)).count().in_range(0, 4)
+                # * desks.related_to(r).count().in_range(0, 1)
+                # * desks.related_to(r).count().in_range(0, 4)
+                * desks.related_to(r).count().in_range(0, 3)
+                * coffeetables.related_to(r).count().in_range(0, 1)
+                # * coffeetables.related_to(r).count().in_range(0, 2)
+                * coffeetables.related_to(r).all(
+                    lambda t: (
+                        obj[Semantics.OfficeShelfItem]
+                        .related_to(t, cu.on)
+                        .count()
+                        .in_range(0, 3)
+                    )
+                )
+                * (
+                    rugs.related_to(r)
+                    # .related_to(furniture.related_to(r), cu.side_by_side)
+                    .count()
+                    .in_range(0, 1)
+                    # .in_range(0, 2)
+                )
+            )
+        )
+    ###############################
 
     score_terms["livingroom"] = livingrooms.mean(
         lambda r: (
@@ -1313,7 +1432,7 @@ def home_furniture_constraints():
         lambda r: (
             storage.all(
                 lambda t: (
-                    obj[Semantics.OfficeShelfItem].related_to(t, cu.on).count() >= 0
+                    obj[Semantics.OfficeShelfItem].related_to(t, cu.on).count() >= 0 # 0
                 )
             )
             * coffeetables.all(
@@ -1341,7 +1460,8 @@ def home_furniture_constraints():
                     diningchairs.related_to(r)
                     .related_to(t, cu.front_against)
                     .count()
-                    .in_range(3, 6)
+                    .in_range(1, 6)
+                    # .in_range(3, 6)
                 )
             )
         )

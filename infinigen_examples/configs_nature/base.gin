@@ -24,8 +24,8 @@ render.render_image_func = @full/render_image
 configure_render_cycles.time_limit = 0
 
 configure_render_cycles.min_samples = 0
-configure_render_cycles.num_samples = 2048 #8192
-configure_render_cycles.adaptive_threshold = 0.05 #0.01
+configure_render_cycles.num_samples = 4096 #2048 #8192
+configure_render_cycles.adaptive_threshold = 0.001 #0.05 #0.01
 configure_render_cycles.denoise = True #False
 configure_render_cycles.exposure = 1
 configure_blender.motion_blur_shutter = 0.15

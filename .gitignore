@@ -95,3 +95,8 @@ sim_testing/
 *tmp*
 
 Miniconda3-latest-Linux-x86_64.sh
+
+outputs_bkp/
+output_bkp/
+final_outputs/
+v3001_final_outputs/

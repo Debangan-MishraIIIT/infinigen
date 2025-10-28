@@ -6,6 +6,7 @@ import argparse
 import logging
 from pathlib import Path
 import os
+from mathutils import Vector, Matrix
 
 # ruff: noqa: E402
 # NOTE: logging config has to be before imports that use logging
@@ -251,7 +252,7 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
 
     def solve_large():
         solve_stage_name("on_floor_and_wall", "large")
-        solve_stage_name("on_floor_freestanding", "large")
+        solve_stage_name("on_floor_freestanding", "large") 
 
     p.run_stage("solve_large", solve_large, use_chance=False, default=state)
 
@@ -275,11 +276,337 @@ def compose_indoors(output_folder: Path, scene_seed: int, **overrides):
     )
     house_bbox = (np.min(house_bbox, axis=0), np.max(house_bbox, axis=0))
 
+
     nonroom_objs = [
         o.obj for o in state.objs.values() if t.Semantics.Room not in o.tags
     ]
     room_objs = [o.obj for o in state.objs.values() if t.Semantics.Room in o.tags]
     scene_objs = solved_rooms + nonroom_objs
+
+
+
+    #########################################################
+    # # Create a dict with all objects in the scene and their bounding boxes
+    print("State objects:", state.objs.values())
+    
+    def get_global_bbox(obj):
+        """Get bounding box in global coordinates."""
+        # Get local bounding box
+        local_min, local_max = butil.bounds(obj)
+
+        print("Object name:", obj.name)
+        print("Local min:", local_min)
+        print("Local max:", local_max)
+        
+        # Get the object's world transformation matrix and convert to numpy
+        world_matrix = np.array(obj.matrix_world)
+        
+        # Transform the 8 corners of the local bounding box to global space
+        corners = np.array([
+            [local_min[0], local_min[1], local_min[2], 1],
+            [local_max[0], local_min[1], local_min[2], 1],
+            [local_min[0], local_max[1], local_min[2], 1],
+            [local_max[0], local_max[1], local_min[2], 1],
+            [local_min[0], local_min[1], local_max[2], 1],
+            [local_max[0], local_min[1], local_max[2], 1],
+            [local_min[0], local_max[1], local_max[2], 1],
+            [local_max[0], local_max[1], local_max[2], 1],
+        ])
+        
+        # Transform all corners to global space
+        global_corners = (world_matrix @ corners.T).T[:, :3]  # Remove homogeneous coordinate
+        
+        # Find the axis-aligned bounding box of the transformed corners
+        global_min = np.min(global_corners, axis=0)
+        global_max = np.max(global_corners, axis=0)
+        
+        return global_min, global_max
+
+    def get_global_bbox_new(obj):
+        print("Line 326 - generate_indoors.py - obj.bound_box:", obj.bound_box)
+        # print the numpy array of obj.bound_box
+        # print obj name and obj bound box
+        print("Line 327 - generate_indoors.py - obj name:", obj.name)
+        print("Line 327 - generate_indoors.py - obj.bound_box numpy array:", np.array(obj.bound_box))
+        print("Line 327 - generate_indoors.py - obj.matrix_world:", obj.matrix_world)
+        # global_corners = [list(obj.matrix_world @ Vector(corner)) for corner in obj.bound_box]
+
+        matrix_world = np.array(obj.matrix_world)
+        obj_bound_box = np.array(obj.bound_box)
+
+
+        ones = np.ones((obj_bound_box.shape[0], 1))
+        coords_hom = np.hstack((obj_bound_box, ones))
+
+        # apply transformation
+        global_corners = (matrix_world @ coords_hom.T).T[:, :3]
+
+        global_min = np.min(global_corners, axis=0)
+        global_max = np.max(global_corners, axis=0)
+
+        print("Line 345 - generate_indoors.py - global_min:", global_min)
+        print("Line 346 - generate_indoors.py - global_max:", global_max)
+        return global_min, global_max
+    
+    # Get bounding boxes in global coordinates
+    scene_objs_bbox = {o.name: get_global_bbox_new(o) for o in scene_objs}
+    print("Line 281 - generate_indoors.py - scene_objs_bbox (GLOBAL):", scene_objs_bbox)
+
+    def check_bbox_overlap(bbox1, bbox2, overlap_threshold=0.1):
+        """
+        Check if two bounding boxes have significant overlap.
+        
+        Args:
+            bbox1, bbox2: Tuples of (min_corner, max_corner) where each corner is (x, y, z)
+            overlap_threshold: Minimum overlap ratio to consider as significant (0.0 to 1.0)
+            
+        Returns:
+            tuple: (has_overlap, overlap_ratio, overlap_volume)
+        """
+        min1, max1 = bbox1
+        min2, max2 = bbox2
+        
+        # Calculate intersection bounds
+        intersect_min = np.maximum(min1, min2)
+        intersect_max = np.minimum(max1, max2)
+        
+        # Check if there's any intersection
+        if np.any(intersect_min >= intersect_max):
+            return False, 0.0, 0.0
+        
+        # Calculate intersection volume
+        intersect_dims = intersect_max - intersect_min
+        intersect_volume = np.prod(intersect_dims)
+        
+        # Calculate volumes of both bounding boxes
+        bbox1_dims = max1 - min1
+        bbox1_volume = np.prod(bbox1_dims)
+        
+        bbox2_dims = max2 - min2
+        bbox2_volume = np.prod(bbox2_dims)
+        
+        # Calculate overlap ratio (intersection volume / smaller bounding box volume)
+        smaller_volume = min(bbox1_volume, bbox2_volume)
+        overlap_ratio = intersect_volume / smaller_volume if smaller_volume > 0 else 0.0
+        
+        has_overlap = overlap_ratio >= overlap_threshold
+        
+        return has_overlap, overlap_ratio, intersect_volume
+
+    def find_object_overlaps(scene_objs_bbox, overlap_threshold=0.1):
+        """
+        Find overlapping objects in the scene, excluding windows and doors.
+        
+        Args:
+            scene_objs_bbox: Dictionary mapping object names to their bounding boxes
+            overlap_threshold: Minimum overlap ratio to consider as significant
+            
+        Returns:
+            list: List of tuples (obj1_name, obj2_name, overlap_ratio, overlap_volume)
+        """
+        overlaps = []
+        object_names = list(scene_objs_bbox.keys())
+        
+        # Filter out windows and doors
+        filtered_objects = []
+        for name in object_names:
+            if not (name.startswith('window') or name.startswith('door') or name == 'entrance'):
+                filtered_objects.append(name)
+        
+        print(f"Checking overlaps among {len(filtered_objects)} objects (excluding windows/doors)")
+        
+        # Check all pairs of filtered objects
+        for i in range(len(filtered_objects)):
+            for j in range(i + 1, len(filtered_objects)):
+                obj1_name = filtered_objects[i]
+                obj2_name = filtered_objects[j]
+                
+                bbox1 = scene_objs_bbox[obj1_name]
+                bbox2 = scene_objs_bbox[obj2_name]
+                
+                has_overlap, overlap_ratio, overlap_volume = check_bbox_overlap(
+                    bbox1, bbox2, overlap_threshold
+                )
+                
+                if has_overlap:
+                    overlaps.append((obj1_name, obj2_name, overlap_ratio, overlap_volume))
+                    print(f"OVERLAP FOUND: {obj1_name} <-> {obj2_name}")
+                    print(f"  Overlap ratio: {overlap_ratio:.3f}")
+                    print(f"  Overlap volume: {overlap_volume:.3f}")
+                    print(f"  BBox1: {bbox1}")
+                    print(f"  BBox2: {bbox2}")
+                    print()
+                else:
+                    print("No overlap found between two objects")
+                    print(f"  Object1: {obj1_name}")
+                    print(f"  Object2: {obj2_name}")
+                    print(f"  BBox1: {bbox1}")
+                    print(f"  BBox2: {bbox2}")
+                    print(f"  Overlap ratio: {overlap_ratio:.3f}")
+                    print(f"  Overlap volume: {overlap_volume:.3f}")
+        
+        return overlaps
+
+    # Check for overlaps
+    overlaps = find_object_overlaps(scene_objs_bbox, overlap_threshold=0.1)
+    
+    if overlaps:
+        print(f"Found {len(overlaps)} overlapping object pairs:")
+        for obj1, obj2, ratio, volume in overlaps:
+            print(f"  {obj1} <-> {obj2}: {ratio:.3f} ratio, {volume:.3f} volume")
+            if "room" in obj1 or "room" in obj2:
+                print("Room overlap must be 100%")
+                print("If not, then assert fails and the script will crash")
+                # assert ratio == 1, f"Room should have 100% overlap with all other objects"
+            else:
+                if 'rug' in obj1 or 'rug' in obj2:
+                    print("Rug overlap is allowed")
+                else:
+                    print("There is an overlap between two objects that are not rooms or rugs")
+                    # raise RuntimeError(f"Object {obj1} or {obj2} has an overlap ratio of {ratio}")
+    else:
+        print("No significant overlaps found between objects (excluding windows/doors)")
+
+    #########################################################
+
+
+    #########################################################
+    # # FIXING WINDOW ORIENTATION
+    # consgraph_rooms = home_constraints.home_room_constraints()
+    # constants = consgraph_rooms.constants
+    # # print(f"Wall thickness half: {constants.wall_thickness / 2}")
+
+    # # Find all WindowFactory objects
+    # window_objects = []
+    # for obj in bpy.data.objects:
+    #     print("Line 482 - generate_indoors.py - obj.name:", obj.name)
+    #     if "window" in obj.name:
+    #         if not obj.hide_render:
+    #             window_objects.append(obj)
+
+    # print(f"Found {len(window_objects)} window objects")
+
+    # # Find the single room object
+    # room = None
+    # for obj in bpy.data.objects:
+    #     print("restrict_parent_rooms_str:", restrict_parent_rooms_str)
+    #     if (restrict_parent_rooms_str in obj.name.lower()):
+    #         # Check if this looks like a room object (has /0.exterior pattern)
+    #         # if "/0.exterior" in obj.name or "/0.interior" in obj.name:
+    #             # Only process rooms that are NOT hidden from render (visible rooms)
+    #         if not obj.hide_render:
+    #             room = obj
+    #             break
+
+    # if not room:
+    #     print("Could not find room object")
+    #     return
+
+    # print(f"Found room: {room.name}")
+
+    # for window_obj in window_objects:
+    #     print(f"Processing window: {window_obj.name}")
+    #     print(f"Window {window_obj.name} belongs to room {room.name}")
+
+    #     # Get window's current transformation matrix
+    #     window_matrix = window_obj.matrix_world
+
+    #     # Get window's local Y axis in world space (this is the direction we want to check)
+    #     # We need to use only the rotation part, not the translation
+    #     window_y_axis = Vector((0, 1, 0))  # Local Y direction
+    #     # Extract rotation matrix (3x3 upper-left part) and transform the Y axis
+    #     rotation_matrix = Matrix(window_matrix.to_3x3())
+    #     window_y_axis_world = rotation_matrix @ window_y_axis
+    #     window_y_axis_world.normalize()
+        
+    #     print(f"Window Y axis (world): {window_y_axis_world}")
+
+    #     # Get room center
+    #     room_center = room.location
+    #     print(f"Room center: {room_center}")
+    #     print(f"Window world location: {window_obj.matrix_world.translation}")
+        
+    #     # Vector from window to room center
+    #     window_to_room = room_center - window_obj.matrix_world.translation
+    #     window_to_room.normalize()
+    #     print(f"Window to room direction: {window_to_room}")
+
+    #     # Check if window Y axis is pointing inward or outward
+    #     # We'll use 3D dot product for more accurate results
+    #     dot_product = window_y_axis_world.dot(window_to_room)
+
+    #     print(f"Window Y axis: {window_y_axis_world}")
+    #     print(f"Direction to room center: {window_to_room}")
+    #     print(f"Dot product: {dot_product}")
+
+    #     if dot_product > 0:
+    #         # Y axis is pointing outward, need to rotate 180° around Z
+    #         print(f"Rotating window {window_obj.name} 180° around Z axis")
+
+    #         # Create rotation matrix for 180° around Z
+    #         rotation_matrix = Matrix.Rotation(np.pi, 4, 'Z')
+
+    #         # Apply rotation to window
+    #         window_obj.matrix_world = Matrix(window_obj.matrix_world) @ rotation_matrix
+            
+    #         # Verify the rotation worked
+    #         new_rotation_matrix = Matrix(window_obj.matrix_world.to_3x3())
+    #         new_y_axis = new_rotation_matrix @ Vector((0, 1, 0))
+    #         new_y_axis.normalize()
+    #         new_dot_product = new_y_axis.dot(window_to_room)
+    #         print(f"After rotation - Y axis: {new_y_axis}, new dot product: {new_dot_product}")
+    #     else:
+    #         print(f"Window {window_obj.name} Y axis is already pointing inward")
+
+    #     # Determine wall positioning by trying both offsets and choosing the one closer to room center
+    #     window_pos = window_obj.matrix_world.translation
+    #     room_center = room.location
+        
+    #     # Try positive offset
+    #     pos_offset = constants.wall_thickness / 2
+    #     # Create world position with positive offset applied
+    #     pos_world_matrix = window_obj.matrix_world
+    #     print(f"Initial Positive world matrix: {pos_world_matrix.translation}")
+    #     print(f"Initial Positive location: {window_obj.location}")
+    #     window_obj.location[1] += pos_offset
+    #     print(f"Positive location: {window_obj.location}")
+    #     depsgraph = bpy.context.evaluated_depsgraph_get()
+    #     depsgraph.update()
+    #     pos_world_matrix = window_obj.matrix_world
+    #     print(f"Positive world matrix: {pos_world_matrix.translation}")
+    #     print(f"Room center: {room_center}")
+    #     pos_distance = (pos_world_matrix.translation - room_center).length
+
+    #     # Try negative offset
+    #     neg_offset = -constants.wall_thickness / 2
+    #     # Create world position with negative offset applied
+    #     neg_world_matrix = window_obj.matrix_world
+    #     print(f"Negative world matrix: {neg_world_matrix.translation}")
+    #     print(f"Initial Negative location: {window_obj.location}")
+    #     window_obj.location[1] += neg_offset
+    #     print(f"Negative location: {window_obj.location}")
+    #     depsgraph = bpy.context.evaluated_depsgraph_get()
+    #     depsgraph.update()
+    #     neg_world_matrix = window_obj.matrix_world
+    #     print(f"Negative world matrix: {neg_world_matrix.translation}")
+    #     print(f"Room center: {room_center}")
+    #     neg_distance = (neg_world_matrix.translation - room_center).length
+        
+    #     # Choose the offset that results in the window being closer to room center
+    #     if pos_distance < neg_distance:
+    #         wall_offset = pos_offset
+    #         print(f"Window {window_obj.name} - Positive offset closer (dist: {pos_distance:.2f} vs {neg_distance:.2f}), using +{wall_offset}")
+    #     else:
+    #         wall_offset = neg_offset
+    #         print(f"Window {window_obj.name} - Negative offset closer (dist: {neg_distance:.2f} vs {pos_distance:.2f}), using {wall_offset}")
+        
+    #     window_obj.location[1] += wall_offset
+    #     print(f"Window {window_obj.name} location: {window_obj.location}")
+    #     # window location is in world coordinates
+    #     print(f"Window {window_obj.name} world location: {window_obj.matrix_world.translation}")
+    #########################################################
+
+
 
     scene_preprocessed = placement.camera.camera_selection_preprocessing(
         terrain=None, scene_objs=scene_objs

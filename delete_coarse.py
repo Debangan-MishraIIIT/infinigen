@@ -10,7 +10,7 @@ Usage:
     python delete_coarse.py [--outputs-dir OUTPUTS_DIR] [--check-interval SECONDS] [--dry-run]
 
 Arguments:
-    --outputs-dir: Path to the outputs directory (default: ./outputs)
+    --outputs-dir: Path to the outputs directory (default: ./final_outputs)
     --check-interval: How often to check for completion in seconds (default: 30)
     --dry-run: Print what would be deleted without actually deleting
 """
@@ -95,10 +95,15 @@ def find_scene_files_and_dirs(logs_dir: Path) -> List[Path]:
     files_to_delete = []
     
     # coarse/scene.blend file
-    coarse_blend = scene_dir / "coarse" / "scene.blend"
-    if coarse_blend.exists():
-        files_to_delete.append(coarse_blend)
+    # coarse_blend = scene_dir / "coarse" / "scene.blend1"
+    # if coarse_blend.exists():
+    #     files_to_delete.append(coarse_blend)
 
+    # fine/scene.blend1 file
+    fine_blend = scene_dir / "fine" / "scene.blend"
+    if fine_blend.exists():
+        files_to_delete.append(fine_blend)
+    
     # fine/scene.blend1 file
     fine_blend = scene_dir / "fine" / "scene.blend1"
     if fine_blend.exists():
@@ -167,8 +172,8 @@ def main():
     parser.add_argument(
         "--outputs-dir", 
         type=Path, 
-        default=Path("./outputs"),
-        help="Path to the outputs directory (default: ./outputs)"
+        default=Path("./v3001_final_outputs"),
+        help="Path to the outputs directory (default: ./final_outputs)"
     )
     parser.add_argument(
         "--check-interval", 

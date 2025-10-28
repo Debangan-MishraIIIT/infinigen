@@ -87,7 +87,7 @@ def home_asset_usage():
 
     used_as[Semantics.BathroomItem] = {
         tableware.BottleFactory,
-        tableware.BowlFactory,
+        # tableware.BowlFactory,
         clothes.TowelFactory,
     }
 
@@ -125,6 +125,21 @@ def home_asset_usage():
         shelves.KitchenCabinetFactory,
         shelves.SingleCabinetFactory,
     }
+
+    ############################
+
+    used_as[Semantics.StorageOpen] = {
+        shelves.SimpleBookcaseFactory,
+        shelves.CellShelfFactory,
+        shelves.LargeShelfFactory,
+    }
+
+    used_as[Semantics.StorageClosed] = {
+        shelves.KitchenCabinetFactory,
+        shelves.SingleCabinetFactory,
+    }
+
+    ############################
 
     used_as[Semantics.SideTable] = {
         shelves.SidetableDeskFactory,
@@ -176,7 +191,9 @@ def home_asset_usage():
     }
 
     used_as[Semantics.Furniture] = set().union(
-        used_as[Semantics.Storage],
+        # used_as[Semantics.Storage],
+        used_as[Semantics.StorageOpen],#######
+        used_as[Semantics.StorageClosed],#######
         used_as[Semantics.Table],
         used_as[Semantics.Seating],
         used_as[Semantics.KitchenCounter],
