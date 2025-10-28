@@ -3,12 +3,14 @@
 
 # Authors: Yiming Zuo, Stamatis Alexandropoulos
 
+import os
+import json
 import bpy
 from mathutils import Vector
 from numpy.random import choice, uniform
 
 from infinigen.assets.materials.ceramic.marble import shader_marble
-from infinigen.assets.objects.shelves.kitchen_cabinet import KitchenCabinetFactory
+from infinigen.assets.objects.shelves.kitchen_cabinet_v2 import KitchenCabinetFactory
 from infinigen.assets.objects.tables.table_top import nodegroup_generate_table_top
 from infinigen.assets.objects.wall_decorations.range_hood import RangeHoodFactory
 from infinigen.assets.utils.object import new_bbox
@@ -250,6 +252,10 @@ class KitchenSpaceFactory(AssetFactory):
 
         surface.add_geomod(cabinet_bottom, geometry_nodes_add_cabinet_top, apply=True)
 
+        # scale to make the heights of pholder and asset matched
+        scale_z = (cabinet_bottom_height+0.13) / cabinet_bottom.dimensions.z
+        cabinet_bottom.dimensions = cabinet_bottom.dimensions * scale_z
+
         if not self.island:
             # top
             top_mid_width = uniform(1.0, 1.3)
@@ -298,6 +304,15 @@ class KitchenSpaceFactory(AssetFactory):
             else:
                 raise NotImplementedError
 
+
+            bpy.ops.object.select_all(action="DESELECT")
+            # offset to make the height of the top mid the same as defined by dimension.z
+            z_offset = z - (top_mid.matrix_world @ Vector(butil.bounds(top_mid)[1])).z
+            cabinet_top_left.location.z = cabinet_top_left.location.z + z_offset
+            cabinet_top_right.location.z = cabinet_top_right.location.z + z_offset
+            top_mid.location.z = top_mid.location.z + z_offset
+
+
             # parts += [sink, cabinet_top_left, cabinet_top_right, top_mid]
             parts += [cabinet_top_left, cabinet_top_right, top_mid]
 
@@ -305,11 +320,34 @@ class KitchenSpaceFactory(AssetFactory):
             parts
         )  # [cabinet_bottom, sink, cabinet_top_left, cabinet_top_right, top_mid])
 
-        if not self.island:
-            kitchen_space.dimensions = self.dimensions
+        # if not self.island:
+        #     kitchen_space.dimensions = self.dimensions
         butil.apply_transform(kitchen_space)
 
         tagging.tag_system.relabel_obj(kitchen_space)
+
+        ############################################################
+        scene_folder = os.environ.get('INFINIGEN_OUTPUT_DIR')
+        if os.path.exists(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")):
+            asset_dict = json.load(open(os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")))
+        else:
+            asset_dict = {}
+        placeholder_name = params['placeholder'].name
+        placeholder_name = placeholder_name.split('.')
+        placeholder_name = placeholder_name[:-1]
+        placeholder_name = '.'.join(placeholder_name)
+        placeholder_name = placeholder_name.replace('placeholder', 'asset')
+        asset_dict[placeholder_name] = {
+            "params": self.params,
+            "cabinet_bottom_height": self.cabinet_bottom_height,
+            "cabinet_top_height": self.cabinet_top_height,
+            "dimensions": self.dimensions,
+            "island": self.island,
+        }
+        json_path = os.path.join(scene_folder if scene_folder else ".", "asset_parameters.json")
+        with open(json_path, "w") as f:
+            json.dump(asset_dict, f, default=str, indent=2)
+        ############################################################
 
         return kitchen_space
 

@@ -58,7 +58,8 @@ class BeverageFridgeFactory(AssetFactory):
     def sample_parameters(dimensions):
         depth = 1 + N(0, 0.1)
         width = 1 + N(0, 0.1)
-        height = 1 + N(0, 0.1)
+        # height = 1 + N(0, 0.1)
+        height = 1.5 + N(0, 0.1)
         # depth, width, height = dimensions
         door_thickness = U(0.05, 0.1) * depth
         door_rotation = 0  # Set to 0 for now

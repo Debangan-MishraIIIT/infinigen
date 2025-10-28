@@ -332,7 +332,8 @@ class SimpleDeskBaseFactory(AssetFactory):
         if params.get("depth", None) is None:
             params["depth"] = np.clip(normal(0.6, 0.05), 0.45, 0.7)
         if params.get("width", None) is None:
-            params["width"] = np.clip(normal(1.0, 0.1), 0.7, 1.3)
+            # params["width"] = np.clip(normal(1.0, 0.1), 0.7, 1.3)
+            params["width"] = np.clip(normal(1.0, 0.1), 0.7, 1.5)
         if params.get("height", None) is None:
             params["height"] = np.clip(normal(0.73, 0.05), 0.6, 0.83)
         if params.get("top_material", None) is None:

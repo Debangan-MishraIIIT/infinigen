@@ -73,6 +73,8 @@ class Semantics(EnumTag):
     HandheldItem = "handheld-item"
 
     # Furniture functions
+    StorageOpen = "storage-open"
+    StorageClosed = "storage-closed"
     Storage = "storage"
     Seating = "seating"
     LoungeSeating = "lounge-seating"

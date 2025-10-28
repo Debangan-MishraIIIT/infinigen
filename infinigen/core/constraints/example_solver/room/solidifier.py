@@ -607,7 +607,8 @@ class BlueprintSolidifier:
                 z_scale = (self.constants.wall_height - wt) / 2 - _snap
                 z_loc = z_scale + wt / 2 + _snap
             else:
-                x_scale = uniform(self.constants.door_width / 2, length / 2 - wm)
+                # x_scale = uniform(self.constants.door_width / 2, length / 2 - wm)
+                x_scale = uniform(self.constants.door_width / 2, length / 2.2 - wm)
                 m = (x_scale + wm) / length
                 lam = uniform(m, 1 - m)
                 z_scale = self.constants.window_size / 2

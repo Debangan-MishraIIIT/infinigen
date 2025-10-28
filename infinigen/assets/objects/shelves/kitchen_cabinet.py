@@ -8,6 +8,7 @@ import json
 import bpy
 import numpy as np
 from numpy.random import uniform
+from mathutils import Vector
 
 from infinigen.assets.materials.wood.plywood import (
     shader_shelves_black_wood,
@@ -112,7 +113,8 @@ class KitchenCabinetBaseFactory(AssetFactory):
         self.frame_fac = LargeShelfBaseFactory(factory_seed)
         self.door_fac = CabinetDoorBaseFactory(factory_seed)
         self.drawer_fac = CabinetDrawerBaseFactory(factory_seed)
-        self.drawer_only = False
+        # self.drawer_only = False
+        self.drawer_only = True
         with FixedSeed(factory_seed):
             self.params = self.sample_params()
 
@@ -352,6 +354,45 @@ class KitchenCabinetBaseFactory(AssetFactory):
 
             # butil.delete(c[:1])
         obj = butil.join_objects(join_objs)
+
+        ############################################################
+        bpy.context.view_layer.update()
+
+        # Calculate bounding box corners in object space
+        bbox = [Vector(v) for v in obj.bound_box]
+
+        # Find min/max in each axis
+        min_x = min(v.x for v in bbox)
+        max_x = max(v.x for v in bbox)
+        min_y = min(v.y for v in bbox)
+        max_y = max(v.y for v in bbox)
+        min_z = min(v.z for v in bbox)
+
+        # Compute bottom-center position
+        bottom_center = Vector((
+            (min_x + max_x) / 2.0,
+            (min_y + max_y) / 2.0,
+            min_z
+        ))
+
+        # --- Debug before ---
+        print(f"[Before] Origin: {obj.location}, Bottom Center: {bottom_center}")
+
+        # Move mesh so that bottom_center aligns with object origin (0,0,0)
+        for v in obj.data.vertices:
+            v.co -= bottom_center
+
+        # Update mesh and apply
+        bpy.context.view_layer.update()
+        bpy.ops.object.transform_apply(location=True)
+
+        # --- Debug after ---
+        print(f"[After]  Origin: {obj.location}, Should now be at bottom center (0,0,0)")
+
+        butil.apply_transform(obj, loc=True, rot=True, scale=True)
+
+        ############################################################
+
         tagging.tag_system.relabel_obj(obj)
 
         ############################################################
@@ -375,7 +416,8 @@ class KitchenCabinetFactory(KitchenCabinetBaseFactory):
     ):
         self.dimensions = dimensions
         super().__init__(factory_seed, params, coarse)
-        self.drawer_only = drawer_only
+        # self.drawer_only = drawer_only
+        self.drawer_only = True
 
     def sample_params(self):
         params = dict()
