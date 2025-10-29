@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=LivingRoom-v3001_Final_Part3
+#SBATCH --job-name=Bedroom-v4001_Final_Part5
 #SBATCH --partition=long
 #SBATCH -c 48
-#SBATCH --output=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_output/living_room_v3001_Final_Part3_job_output-%j.txt
-#SBATCH --error=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_error/living_room_v3001_Final_Part3_job_error-%j.txt
+#SBATCH --output=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_output/bedroom_v4001_Final_Part5_job_output-%j.txt
+#SBATCH --error=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_error/bedroom_v4001_Final_Part5_job_error-%j.txt
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
 #SBATCH --time=24:00:00
@@ -17,10 +17,10 @@ conda activate infinigen
 
 
 python -m infinigen.datagen.manage_jobs \
-    --output_folder testing_2/Bedroom_v3001_Final_Part3 \
+    --output_folder v3001_final_outputs/Bedroom_v4001_Final_Part5 \
     --overwrite \
     --num_scenes 1000 \
-    --configs base_indoors_testing.gin singleroom.gin studio.gin \
+    --configs singleroom.gin studio.gin \
     --pipeline_overrides \
         get_cmd.driver_script=infinigen_examples.generate_indoors \
         LocalScheduleHandler.use_gpu=True \

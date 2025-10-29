@@ -20,6 +20,13 @@ cmake -S . -Bbuild -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_BUILD_TYPE=Release
 #   -DEGL_LIBRARIES=/network/scratch/b/buvanesa/conda_envs/infinigen/lib \
 #   -DCMAKE_PREFIX_PATH=/network/scratch/b/buvanesa/conda_envs/infinigen
 
+cmake -S . -Bbuild -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_BUILD_TYPE=Release \
+  -DOPENGL_EGL_INCLUDE_DIR=/home/mila/a/agrawala/.conda/envs/infinigen/include \
+  -DOPENGL_LIBRARIES=/home/mila/a/agrawala/.conda/envs/infinigen/lib \
+  -DEGL_INCLUDE_DIR=/home/mila/a/agrawala/.conda/envs/infinigen/include \
+  -DEGL_LIBRARIES=/home/mila/a/agrawala/.conda/envs/infinigen/lib \
+  -DCMAKE_PREFIX_PATH=/home/mila/a/agrawala/.conda/envs/infinigen
+
 cmake --build build --target all
 ./build/customgt -in x -dst_in x -out x --frame 0 --dst_frame 0
 if [ $? -eq 0 ]; then

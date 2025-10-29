@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=LivingRoom-v3001_Final_Part3
+#SBATCH --job-name=Kitchen-v4001_AA_Final_Part4
 #SBATCH --partition=long
 #SBATCH -c 48
-#SBATCH --output=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_output/living_room_v3001_Final_Part3_job_output-%j.txt
-#SBATCH --error=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_error/living_room_v3001_Final_Part3_job_error-%j.txt
+#SBATCH --output=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_output/kitchen_v4001_AA_Final_Part4_job_output-%j.txt
+#SBATCH --error=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_error/kitchen_v4001_AA_Final_Part4_job_error-%j.txt
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
 #SBATCH --time=24:00:00
@@ -15,19 +15,19 @@ export __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/10_nvidia.js
 module load anaconda/3
 conda activate infinigen
 
-
+# v3001_final_outputs
 python -m infinigen.datagen.manage_jobs \
-    --output_folder testing_2/Bedroom_v3001_Final_Part3 \
+    --output_folder v3001_final_outputs/Kitchen_v4001_AA_Final_Part4 \
     --overwrite \
     --num_scenes 1000 \
-    --configs base_indoors_testing.gin singleroom.gin studio.gin \
+    --configs singleroom.gin studio.gin \
     --pipeline_overrides \
         get_cmd.driver_script=infinigen_examples.generate_indoors \
         LocalScheduleHandler.use_gpu=True \
         iterate_scene_tasks.n_camera_rigs=2 \
     --overrides \
         compose_indoors.terrain_enabled=False \
-        restrict_solving.restrict_parent_rooms=\[\"Bedroom\"\] \
+        restrict_solving.restrict_parent_rooms=\[\"Kitchen\"\] \
         compose_indoors.place_2=True \
     --pipeline_configs \
         local_256GB_custom.gin \
