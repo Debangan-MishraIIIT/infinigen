@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=LivingRoom-v4001_AA_Final_Part4
+#SBATCH --job-name=Bathroom-v4001_Final_Part4
 #SBATCH --partition=long
 #SBATCH -c 48
-#SBATCH --output=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_output/living_room_v4001_AA_Final_Part4_job_output-%j.txt
-#SBATCH --error=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_error/living_room_v4001_AA_Final_Part4_job_error-%j.txt
+#SBATCH --output=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_output/bathroom_v4001_Final_Part4_job_output-%j.txt
+#SBATCH --error=/network/scratch/a/ankur.sikarwar/infinigen/slurm_logs_error/bathroom_v4001_Final_Part4_job_error-%j.txt
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
 #SBATCH --time=24:00:00
@@ -15,12 +15,12 @@ export __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/10_nvidia.js
 module load anaconda/3
 conda activate infinigen
 
-# v3001_final_outputs
+
 python -m infinigen.datagen.manage_jobs \
-    --output_folder kitchen_teest_2/Kitchen_v4001_AA_Final_Part4 \
+    --output_folder testing_kitchen_10_max_fast_solve/Kitchen_v4001_Final_Part4 \
     --overwrite \
     --num_scenes 1000 \
-    --configs fast_solve.gin base_indoors_testing.gin singleroom.gin studio.gin \
+    --configs singleroom.gin studio.gin base_indoors_bathroom_test.gin \
     --pipeline_overrides \
         get_cmd.driver_script=infinigen_examples.generate_indoors \
         LocalScheduleHandler.use_gpu=True \
@@ -29,8 +29,6 @@ python -m infinigen.datagen.manage_jobs \
         compose_indoors.terrain_enabled=False \
         restrict_solving.restrict_parent_rooms=\[\"Kitchen\"\] \
         compose_indoors.place_2=True \
-        compose_indoors.solve_medium_enabled=True \
-        compose_indoors.solve_small_enabled=True \
     --pipeline_configs \
         local_256GB_custom.gin \
         monocular.gin \

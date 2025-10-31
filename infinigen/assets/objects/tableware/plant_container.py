@@ -49,7 +49,7 @@ class PlantPotFactory(PotFactory):
 class PlantContainerFactory(AssetFactory):
     plant_factories = [
         CactusFactory,
-        MushroomFactory,
+        # MushroomFactory,
         FernFactory,
         # SucculentFactory,
         SpiderPlantFactory,
