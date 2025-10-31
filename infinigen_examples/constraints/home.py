@@ -1104,7 +1104,8 @@ def home_furniture_constraints():
                 kitchen_appliances_big[appliances.OvenFactory].related_to(r).count()
                 == 1
             )
-            * (wallfurn[shelves.KitchenCabinetFactory].related_to(r).count() >= 0)
+            # * (wallfurn[shelves.KitchenCabinetFactory].related_to(r).count() >= 0)
+            * (wallfurn[shelves.KitchenCabinetFactory].related_to(r).count().equals(0))
             * (microwaves.related_to(wallcounter.related_to(r)).count().in_range(0, 1))
         )
     )

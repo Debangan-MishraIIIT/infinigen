@@ -2,14 +2,14 @@ include 'infinigen_examples/configs_nature/base.gin'
 include 'infinigen_examples/configs_nature/performance/fast_terrain_assets.gin'
 
 # overriden in fast_solve.gin if present
-compose_indoors.solve_steps_large = 200 #300 #600 #3000 #300
-compose_indoors.solve_steps_medium = 100 #200 #2000 #200
-compose_indoors.solve_steps_small = 30 #50 #100 #500 #50
+compose_indoors.solve_steps_large = 100 #600 #3000 #300
+compose_indoors.solve_steps_medium = 40 #2000 #200
+compose_indoors.solve_steps_small = 20 #100 #500 #50
 
 SimulatedAnnealingSolver.initial_temp = 6 #3
 SimulatedAnnealingSolver.final_temp = 0.001
 SimulatedAnnealingSolver.finetune_pct = 0.15
-SimulatedAnnealingSolver.max_invalid_candidates = 15 #5
+SimulatedAnnealingSolver.max_invalid_candidates = 10 #5
 
 RoomConstants.n_stories = 1
 
