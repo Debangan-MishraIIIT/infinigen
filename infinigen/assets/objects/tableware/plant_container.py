@@ -155,7 +155,8 @@ class LargePlantContainerFactory(PlantContainerFactory):
         super(LargePlantContainerFactory, self).__init__(factory_seed, coarse)
         with FixedSeed(self.factory_seed):
             self.base_factory.depth = log_uniform(1.0, 1.5)
-            self.base_factory.scale = log_uniform(0.15, 0.25)
+            # self.base_factory.scale = log_uniform(0.15, 0.25)
+            self.base_factory.scale = log_uniform(0.15, 0.18)
             self.side_size = (
                 self.base_factory.scale * uniform(1.5, 2.0) * self.base_factory.r_expand
             )

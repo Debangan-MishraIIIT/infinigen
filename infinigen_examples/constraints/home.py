@@ -562,11 +562,29 @@ def home_furniture_constraints():
     # storage = furniture[Semantics.Storage]
     # storage_freestanding = storage.related_to(rooms, cu.against_wall)
 
+    # #########################################################
+    # storage_open = furniture[Semantics.StorageOpen]
+    # storage_closed = furniture[Semantics.StorageClosed]
+    
+    # if uniform(0, 1) < 0.5:
+    #     print("storage_open")
+    #     params["has_tv"] = 1
+    #     storage_choice = "open"
+    #     storage = storage_open
+    #     storage_freestanding = storage_open.related_to(rooms, cu.against_wall)
+    # else:
+    #     print("storage_closed")
+    #     params["has_tv"] = 0
+    #     storage_choice = "closed"
+    #     storage = storage_closed
+    #     storage_freestanding = storage_closed.related_to(rooms, cu.against_wall)
+    # #########################################################
+
     #########################################################
     storage_open = furniture[Semantics.StorageOpen]
     storage_closed = furniture[Semantics.StorageClosed]
     
-    if uniform(0, 1) < 0.5:
+    if uniform(0, 1) < 0.75:
         print("storage_open")
         params["has_tv"] = 1
         storage_choice = "open"
@@ -579,6 +597,8 @@ def home_furniture_constraints():
         storage = storage_closed
         storage_freestanding = storage_closed.related_to(rooms, cu.against_wall)
     #########################################################
+
+
 
     for k, v in params.items():
         print(f"{home_furniture_constraints.__name__} params - {k}: {v}")
@@ -969,7 +989,8 @@ def home_furniture_constraints():
             beds.related_to(r).count().in_range(1, 4)
             # * sidetables.related_to(beds.related_to(r)).count().in_range(0, 2)
             * sidetables.related_to(beds.related_to(r)).count().in_range(0, 4)
-            * rugs.related_to(r).count().in_range(0, 1)
+            # * rugs.related_to(r).count().in_range(0, 1)
+            * rugs.related_to(r).count().equals(0)
             # * desks.related_to(r).count().in_range(0, 1)
             # * desks.related_to(r).count().in_range(0, 4)
             * desks.related_to(r).count().in_range(0, 3)
@@ -1334,7 +1355,8 @@ def home_furniture_constraints():
                 * sidetables.related_to(sofas.related_to(r)).count().in_range(0, 4)
                 # * desks.related_to(r).count().in_range(0, 1)
                 # * desks.related_to(r).count().in_range(0, 4)
-                * desks.related_to(r).count().in_range(0, 3)
+                # * desks.related_to(r).count().in_range(0, 3)
+                * desks.related_to(r).count().equals(0)
                 * coffeetables.related_to(r).count().in_range(0, 1)
                 # * coffeetables.related_to(r).count().in_range(0, 2)
                 * coffeetables.related_to(r).all(
@@ -1349,7 +1371,8 @@ def home_furniture_constraints():
                     rugs.related_to(r)
                     # .related_to(furniture.related_to(r), cu.side_by_side)
                     .count()
-                    .in_range(0, 1)
+                    .equals(0)
+                    # .in_range(0, 1)
                     # .in_range(0, 2)
                 )
             )
@@ -1366,7 +1389,8 @@ def home_furniture_constraints():
                 * sidetables.related_to(sofas.related_to(r)).count().in_range(0, 4)
                 # * desks.related_to(r).count().in_range(0, 1)
                 # * desks.related_to(r).count().in_range(0, 4)
-                * desks.related_to(r).count().in_range(0, 3)
+                # * desks.related_to(r).count().in_range(0, 3)
+                * desks.related_to(r).count().equals(0)
                 * coffeetables.related_to(r).count().in_range(0, 1)
                 # * coffeetables.related_to(r).count().in_range(0, 2)
                 * coffeetables.related_to(r).all(
@@ -1381,7 +1405,8 @@ def home_furniture_constraints():
                     rugs.related_to(r)
                     # .related_to(furniture.related_to(r), cu.side_by_side)
                     .count()
-                    .in_range(0, 1)
+                    .equals(0)
+                    # .in_range(0, 1)
                     # .in_range(0, 2)
                 )
             )
@@ -1395,7 +1420,8 @@ def home_furniture_constraints():
                 * sidetables.related_to(sofas.related_to(r)).count().in_range(0, 4)
                 # * desks.related_to(r).count().in_range(0, 1)
                 # * desks.related_to(r).count().in_range(0, 4)
-                * desks.related_to(r).count().in_range(0, 3)
+                # * desks.related_to(r).count().in_range(0, 3)
+                * desks.related_to(r).count().equals(0)
                 * coffeetables.related_to(r).count().in_range(0, 1)
                 # * coffeetables.related_to(r).count().in_range(0, 2)
                 * coffeetables.related_to(r).all(
@@ -1410,7 +1436,8 @@ def home_furniture_constraints():
                     rugs.related_to(r)
                     # .related_to(furniture.related_to(r), cu.side_by_side)
                     .count()
-                    .in_range(0, 1)
+                    .equals(0)
+                    # .in_range(0, 1)
                     # .in_range(0, 2)
                 )
             )
